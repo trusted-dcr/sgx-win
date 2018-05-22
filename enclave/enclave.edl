@@ -1,0 +1,12 @@
+enclave {
+    from "sgx_tstdc.edl" import *;
+
+    trusted {
+        public void receive_msg([in, size=msg_size] void* ptr, size_t msg_size);
+
+    };
+
+    untrusted {
+        void send_msg([in, size=msg_size] void* ptr, size_t msg_size);
+    };
+};
