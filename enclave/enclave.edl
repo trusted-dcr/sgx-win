@@ -1,12 +1,13 @@
 enclave {
-    from "sgx_tstdc.edl" import *;
+    include "msg.h"
 
     trusted {
-        public void receive_msg([in, size=msg_size] void* ptr, size_t msg_size);
-
+        public void recv_command_req(command_req_t req);
+        public void recv_command_rsp(command_rsp_t req);
     };
 
     untrusted {
-        void send_msg([in, size=msg_size] void* ptr, size_t msg_size);
+		void send_command_req(command_req_t req);
+		void send_command_rsp(command_rsp_t rsp);
     };
 };

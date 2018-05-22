@@ -18,22 +18,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="enclave_t.c">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="enclave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dcr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="enclave_t.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="enclave_t.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="dcr.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="msg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="enclave_t.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
