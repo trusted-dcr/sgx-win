@@ -27,6 +27,9 @@
     <ClCompile Include="enclave_t.c">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="crypto.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dcr.h">
@@ -37,6 +40,9 @@
     </ClInclude>
     <ClInclude Include="enclave_t.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

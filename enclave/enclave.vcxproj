@@ -320,11 +320,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="crypto.cpp" />
     <ClCompile Include="enclave.cpp" />
     <ClCompile Include="dcr.cpp" />
     <ClCompile Include="enclave_t.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="crypto.h" />
     <ClInclude Include="dcr.h" />
     <ClInclude Include="enclave_t.h" />
     <ClInclude Include="msg.h" />
