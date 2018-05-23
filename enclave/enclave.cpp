@@ -1,6 +1,7 @@
 #include <string>
 #include "enclave_t.h"
-#include "msg.h"
+#include "dcr.h"
+#include "crypto.h"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ void recv_command_rsp(command_rsp_t rsp) {
 void recv_append_req(append_req_t req) {
 	// copy entries to protected memory
 	entry_t* prot_entries = new entry_t[req.entries_n];
-	memcpy(req.entries, prot_entries, sizeof(entry_t) * req.entries_n);
+	memcpy(prot_entries, req.entries, sizeof(entry_t) * req.entries_n);
 	req.entries = prot_entries;
 }
 
