@@ -1,0 +1,3 @@
+[submodule "tdcr-proto"]
+	path = tdcr-proto
+	url = https://github.com/trusted-dcr/tdcr-proto

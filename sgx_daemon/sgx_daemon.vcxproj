@@ -163,6 +163,11 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">
     <ClCompile>
@@ -180,6 +185,11 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -197,6 +207,11 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">
     <ClCompile>
@@ -214,6 +229,11 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -235,6 +255,11 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">
     <ClCompile>
@@ -256,6 +281,11 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -277,6 +307,11 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
     <ClCompile>
@@ -298,9 +333,15 @@
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>mkdir $(ProjectDir)protos;
+protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="enclave_u.h" />
+    <ClInclude Include="protos\raft.pb.h" />
     <ClInclude Include="sgx_daemon.h" />
   </ItemGroup>
   <ItemGroup>
@@ -322,6 +363,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="protos\raft.pb.cc" />
     <ClCompile Include="sgx_daemon.cpp" />
   </ItemGroup>
   <ItemGroup>

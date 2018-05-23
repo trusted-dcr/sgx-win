@@ -42,5 +42,9 @@ void send_election_rsp(election_rsp_t rsp) {
 }
 
 int main() {
-
+	sgx_launch_token_t token;
+	SecureZeroMemory(token, sizeof(token));
+	int updated = 0;
+	sgx_enclave_id_t eid = 0;
+	sgx_status_t a = sgx_create_enclave(ENCLAVE_FILE, SGX_DEBUG_FLAG, &token, &updated, &eid, NULL);
 }

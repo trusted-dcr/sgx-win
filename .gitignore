@@ -1,3 +1,5 @@
+sgx_daemon/protos/
+
 *.pem
 
 enclave/enclave_t.h

@@ -16,6 +16,9 @@
     <Filter Include="Generated Files">
       <UniqueIdentifier>{ad7c321b-a3a6-4fff-ad43-0d47fb934cfd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Generated Files\protos">
+      <UniqueIdentifier>{f660b986-26eb-4801-abcf-9d89c20726d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sgx_daemon.h">
@@ -24,6 +27,9 @@
     <ClInclude Include="enclave_u.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="protos\raft.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sgx_daemon.cpp">
@@ -31,6 +37,9 @@
     </ClCompile>
     <ClCompile Include="enclave_u.c">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\raft.pb.cc">
+      <Filter>Generated Files\protos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
