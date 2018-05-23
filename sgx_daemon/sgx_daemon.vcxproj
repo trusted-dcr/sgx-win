@@ -154,7 +154,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;..\enclave;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -166,6 +166,8 @@
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -176,7 +178,7 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -188,6 +190,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -198,7 +202,7 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;..\enclave;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -210,6 +214,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -220,7 +226,7 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;..\enclave;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -232,6 +238,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -244,7 +252,7 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -258,6 +266,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -270,7 +280,7 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>EDEBUG;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;..\enclave;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -284,6 +294,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -296,7 +308,7 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;..\enclave;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -310,6 +322,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -322,7 +336,7 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>EDEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;..\enclave;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -336,11 +350,15 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
     <PreBuildEvent>
       <Command>mkdir $(ProjectDir)protos;
 protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
+    $(SolutionDir)tdcr-proto\protos\crypto.proto^
+    $(SolutionDir)tdcr-proto\protos\network.proto^
     $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="enclave_u.h" />
+    <ClInclude Include="protos\crypto.pb.h" />
+    <ClInclude Include="protos\network.pb.h" />
     <ClInclude Include="protos\raft.pb.h" />
     <ClInclude Include="sgx_daemon.h" />
   </ItemGroup>
@@ -363,6 +381,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="protos\crypto.pb.cc" />
+    <ClCompile Include="protos\network.pb.cc" />
     <ClCompile Include="protos\raft.pb.cc" />
     <ClCompile Include="sgx_daemon.cpp" />
   </ItemGroup>

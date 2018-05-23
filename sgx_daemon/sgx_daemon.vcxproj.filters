@@ -30,6 +30,12 @@
     <ClInclude Include="protos\raft.pb.h">
       <Filter>Generated Files\protos</Filter>
     </ClInclude>
+    <ClInclude Include="protos\crypto.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\network.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sgx_daemon.cpp">
@@ -39,6 +45,12 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="protos\raft.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\crypto.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\network.pb.cc">
       <Filter>Generated Files\protos</Filter>
     </ClCompile>
   </ItemGroup>
