@@ -2,62 +2,55 @@
 
 dcr_workflow workflow;
 
-bool is_event_enabled(UID event_id)
-{
-	dcr_event _event = workflow.event_store[event_id];
-	if (_event.excluded)
-		return false;
+bool is_event_enabled(uid_t event_id) {
+  dcr_event _event = workflow.event_store[event_id];
+  if (_event.excluded)
+    return false;
 
-	for (unsigned int i = 0; i < _event.incoming_relations.conditions.size(); i++)
-	{
-		dcr_event condition_event = workflow.event_store[_event.incoming_relations.conditions[i]];
-		if (!condition_event.executed && !condition_event.excluded)
-			return false;
-	}
+  for (unsigned int i = 0; i < _event.incoming_relations.conditions.size(); i++) {
+    dcr_event condition_event = workflow.event_store[_event.incoming_relations.conditions[i]];
+    if (!condition_event.executed && !condition_event.excluded)
+      return false;
+  }
 
-	for (unsigned int i = 0; i < _event.incoming_relations.milestones.size(); i++)
-	{
-		if (!workflow.event_store[_event.incoming_relations.milestones[i]].pending)
-			return false;
-	}
+  for (unsigned int i = 0; i < _event.incoming_relations.milestones.size(); i++) {
+    if (!workflow.event_store[_event.incoming_relations.milestones[i]].pending)
+      return false;
+  }
 
-	return true;
+  return true;
 }
 
-void set_event_executed(UID event_id)
-{
-	dcr_event _event = workflow.event_store[event_id];
-	_event.executed = true;
-	_event.pending = false;
+void set_event_executed(uid_t event_id) {
+  dcr_event _event = workflow.event_store[event_id];
+  _event.executed = true;
+  _event.pending = false;
 
-	for (unsigned int i = 0; i < _event.outgoing_relations.excludes.size(); i++)
-	{
-		workflow.event_store[_event.outgoing_relations.excludes[i]].excluded = true;
-	}
+  for (unsigned int i = 0; i < _event.outgoing_relations.excludes.size(); i++) {
+    workflow.event_store[_event.outgoing_relations.excludes[i]].excluded = true;
+  }
 
-	for (unsigned int i = 0; i < _event.outgoing_relations.includes.size(); i++)
-	{
-		workflow.event_store[_event.outgoing_relations.includes[i]].excluded = false;
-	}
+  for (unsigned int i = 0; i < _event.outgoing_relations.includes.size(); i++) {
+    workflow.event_store[_event.outgoing_relations.includes[i]].excluded = false;
+  }
 
-	for (unsigned int i = 0; i < _event.outgoing_relations.responses.size(); i++)
-	{
-		workflow.event_store[_event.outgoing_relations.responses[i]].pending = true;
-	}
+  for (unsigned int i = 0; i < _event.outgoing_relations.responses.size(); i++) {
+    workflow.event_store[_event.outgoing_relations.responses[i]].pending = true;
+  }
 }
 
 
 //void enclave_create_event(int event_size, enclave_dcr_event* _event_in,
-//	int in_excludes_size, UID* in_excludes,
-//	int in_includes_size, UID* in_includes,
-//	int in_responses_size, UID* in_responses,
-//	int in_conditions_size, UID* in_conditions,
-//	int in_milestones_size, UID* in_milestones,
-//	int out_excludes_size, UID* out_excludes,
-//	int out_includes_size, UID* out_includes,
-//	int out_responses_size, UID* out_responses,
-//	int out_conditions_size, UID* out_conditions,
-//	int out_milestones_size, UID* out_milestones,
+//	int in_excludes_size, uid_t* in_excludes,
+//	int in_includes_size, uid_t* in_includes,
+//	int in_responses_size, uid_t* in_responses,
+//	int in_conditions_size, uid_t* in_conditions,
+//	int in_milestones_size, uid_t* in_milestones,
+//	int out_excludes_size, uid_t* out_excludes,
+//	int out_includes_size, uid_t* out_includes,
+//	int out_responses_size, uid_t* out_responses,
+//	int out_conditions_size, uid_t* out_conditions,
+//	int out_milestones_size, uid_t* out_milestones,
 //	int name_size, char* name)
 //{
 //	// Deref event pointer to enable persistance in store

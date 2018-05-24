@@ -24,7 +24,7 @@ typedef struct command_req_t {
   uid_t target;
   uid_t source;
   command_tag_t tag;
-  uid_t event;
+  uid_t event; 
   sgx_cmac_128bit_tag_t mac;
 } command_req_t;
 
@@ -41,6 +41,8 @@ typedef struct command_rsp_t {
 typedef struct entry_t {
   uint32_t index;
   uint32_t term;
+  uid_t event;
+  uid_t source;
   command_tag_t tag;
 } entry_t;
 

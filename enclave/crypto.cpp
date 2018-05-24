@@ -9,7 +9,6 @@ bool cmp_macs(sgx_cmac_128bit_tag_t mac_1, sgx_cmac_128bit_tag_t mac_2) {
   return true;
 }
 
-
 //append_req_t is nested
 sgx_status_t get_mac_append_req(append_req_t* append_req, sgx_cmac_128bit_tag_t* tag) {
   append_req_t cpy;
@@ -45,7 +44,7 @@ sgx_status_t set_mac_append_req(append_req_t* append_req) {
 sgx_status_t validate_append_req(append_req_t* append_req, bool& valid) {
   sgx_cmac_128bit_tag_t tag;
   sgx_status_t ret = get_mac_append_req(append_req, &tag);
-  //valid = cmp_macs(append_req->mac, tag);
+  valid = cmp_macs(append_req->mac, tag);
 
   return ret;
 }

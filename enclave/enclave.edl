@@ -13,13 +13,16 @@ enclave {
 
         public void recv_election_req(election_req_t req);
         public void recv_election_rsp(election_rsp_t rsp);
+
+		public void timeout();
+		public void intialize();
     };
 
     untrusted {
 		void send_command_req(command_req_t req);
 		void send_command_rsp(command_rsp_t rsp);
 
-        void send_append_req(append_req_t req);
+        void send_append_req(append_req_t req, [in, size=size] entry_t* entries, int size);
         void send_append_rsp(append_rsp_t rsp);
 
         void send_poll_req(poll_req_t req);
@@ -27,5 +30,8 @@ enclave {
 
         void send_election_req(election_req_t req);
         void send_election_rsp(election_rsp_t rsp);
+
+		void update_timeout();
+		bool is_timed_out();
     };
 };

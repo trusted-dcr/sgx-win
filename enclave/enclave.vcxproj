@@ -324,12 +324,16 @@
     <ClCompile Include="enclave.cpp" />
     <ClCompile Include="dcr.cpp" />
     <ClCompile Include="enclave_t.c" />
+    <ClCompile Include="msg_utils.cpp" />
+    <ClCompile Include="raft.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h" />
     <ClInclude Include="dcr.h" />
     <ClInclude Include="enclave_t.h" />
     <ClInclude Include="msg.h" />
+    <ClInclude Include="msg_util.h" />
+    <ClInclude Include="raft.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="enclave.edl">
