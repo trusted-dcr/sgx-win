@@ -5,9 +5,13 @@
 #include "msg.h"
 #include "msg_util.h"
 
+
 enum role_t { FOLLOWER, CANDIDATE, LEADER };
 
 const uid_t empty_uid = { 0 };
+const uint64_t delta_heartbeat = 500;
+const uint64_t delta_min_time = 2*delta_heartbeat;
+const uint64_t delta_max_time = 8000;
 
 class peer {
 public:
@@ -25,6 +29,10 @@ public:
   uid_t leader;
   uint32_t cluster_size;
   std::vector<uid_t> cluster_members;
+  uint64_t t_min;
+  uint64_t t;
+  uint64_t now;
+  //sgx_thread_mutex_t* time_lock;
 
   void init();
 

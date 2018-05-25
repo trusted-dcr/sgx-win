@@ -11,6 +11,9 @@
 //sgx_enclave_id_t eid = 0;
 //sgx_status_t status = sgx_create_enclave(ENCLAVE_FILE, SGX_DEBUG_FLAG, &token, &updated, &eid, NULL);
 
+void request_time() {
+
+}
 
 void send_command_req(command_req_t req) {
 
@@ -42,14 +45,6 @@ void send_election_req(election_req_t req) {
 
 void send_election_rsp(election_rsp_t rsp) {
 
-}
-
-void update_timeout() {
-
-}
-
-bool is_timed_out() {
-  return true;
 }
 
 void start(sgx_enclave_id_t eid) {

@@ -1,4 +1,5 @@
 #include <string>
+#include <sgx_trts.h>
 #include "enclave_t.h"
 #include "dcr.h"
 #include "crypto.h"
@@ -40,6 +41,27 @@ bool verify_msg_term(T msg, V mac, W send) {
     return false;
   }
   return true;
+}
+
+void update_timeout() {
+  if (self.role == LEADER) {
+    self.t = self.now + delta_heartbeat;
+    return;
+  }
+  self.t_min = self.now + delta_min_time;
+
+  unsigned char* rand = new unsigned char[2];
+  uint16_t r;
+  do {
+    sgx_read_rand(rand, 2);
+    r = (rand[1] << 8) + rand[0];
+  } while (r > delta_max_time);
+  
+  self.t = self.t_min + r;
+}
+
+bool min_time_exceeded() {
+  return self.now > self.t_min;
 }
 
 void start_election() {
@@ -130,10 +152,8 @@ void start_poll() {
 }
 
 void recv_command_req(command_req_t req) {
-  bool valid = verify_mac_and_own_term<command_req_t>(&req, validate_append_req);
-  if (valid) {
-    valid = verify_msg_term<command_req_t, command_rsp_t>(req, set_mac_flat_msg <append_rsp_t>, send_append_rsp);
-  }
+  bool valid = false; 
+  validate_flat_msg<command_req_t>(&req, valid);
   if (!valid)
     return;
 
@@ -205,7 +225,7 @@ void recv_command_req(command_req_t req) {
     send_append_req(msg, msg.entries, msg.entries_n);
   }
 
-  //TODO: reset heartbeat
+  update_timeout(); // essentially a heartbeat, so skip one.
 }
 
 void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed for dcr/locking logic.
@@ -329,8 +349,7 @@ void recv_poll_req(poll_req_t req) {
     return;
   }
   // follower_recv logic
-  bool* timeout = new bool();
-  sgx_status_t status = is_timed_out(timeout);
+  bool valid_time = min_time_exceeded();
 
   poll_rsp_t rsp = {
     req.source,   /*target*/
@@ -340,10 +359,10 @@ void recv_poll_req(poll_req_t req) {
     (self.last_entry().term < req.last_term || // ( their term is higher OR
     self.last_entry().term == req.last_term && // their term is same AND
     self.last_entry().index <= req.last_index) && //their INDEX is higher) AND
-    timeout),    /*success*/                 // timed out (min time)
+    valid_time),  /*success*/                 // timed out (min time)
     {0}           /*mac*/
   };
-  status = set_mac_flat_msg<poll_rsp_t>(&rsp);
+  sgx_status_t status = set_mac_flat_msg<poll_rsp_t>(&rsp);
   if (status != SGX_SUCCESS)
     return;
   send_poll_rsp(rsp);
@@ -423,10 +442,9 @@ void recv_election_rsp(election_rsp_t rsp) {
 void timeout() {
   if (self.role == LEADER) {
     heartbeat();
-    //TODO: reset heartbeat
+    update_timeout();
   }
   if (self.role == CANDIDATE) {
-    update_timeout(); //not sure!
     start_election(); //try again
   }
   if (self.role == FOLLOWER) {
@@ -437,6 +455,15 @@ void timeout() {
 
 }
 
+void set_time(uint64_t ticks) {
+  self.now = ticks;
+  if (self.now > self.t)
+    timeout();
+}
+
+
 void intialize() {
-  
+  //self.time_lock = new sgx_thread_mutex_t();
+  //sgx_thread_mutex_init(self.time_lock,NULL);
+  //self.time_lock->m_control = SGX_THREAD_MUTEX_RECURSIVE;
 }

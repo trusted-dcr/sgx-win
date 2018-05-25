@@ -2,6 +2,8 @@ enclave {
     include "msg.h"
 
     trusted {
+		public void set_time(uint64_t ticks);
+
         public void recv_command_req(command_req_t req);
         public void recv_command_rsp(command_rsp_t rsp);
 
@@ -14,7 +16,6 @@ enclave {
         public void recv_election_req(election_req_t req);
         public void recv_election_rsp(election_rsp_t rsp);
 
-		public void timeout();
 		public void intialize();
     };
 
@@ -31,7 +32,6 @@ enclave {
         void send_election_req(election_req_t req);
         void send_election_rsp(election_rsp_t rsp);
 
-		void update_timeout();
-		bool is_timed_out();
+		void request_time() allow(set_time);
     };
 };
