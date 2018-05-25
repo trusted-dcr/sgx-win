@@ -34,7 +34,7 @@ public:
 
   void update_term(uint32_t new_term, uid_t new_leader);
 
-  bool exist_in_log(uint32_t term, uint32_t index);
+  bool term_and_index_exist_in_log(uint32_t term, uint32_t index);
   bool exist_in_log(command_tag_t tag, entry_t entry);
 
   uint32_t largest_majority_index();

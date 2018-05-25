@@ -36,7 +36,7 @@ void peer::update_term(uint32_t new_term, uid_t new_leader) {
   leader = new_leader;
 }
 
-bool peer::exist_in_log(uint32_t term, uint32_t index) {
+bool peer::term_and_index_exist_in_log(uint32_t term, uint32_t index) {
   if (log.size() >= index)
     return false;
   entry_t entry_i = log[index];
