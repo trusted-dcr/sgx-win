@@ -5,7 +5,6 @@ bool cmp_macs(sgx_cmac_128bit_tag_t mac_1, sgx_cmac_128bit_tag_t mac_2) {
     if (mac_1[i] != mac_2[i])
       return false;
   }
-
   return true;
 }
 

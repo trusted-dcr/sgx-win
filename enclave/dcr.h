@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <vector>
 #include <map>
+#include <set>
 #include "msg.h"
 #include "msg_util.h"
 
@@ -28,12 +29,18 @@ struct dcr_event {
   relation_set outgoing_relations;
 };
 
-struct dcr_workflow {
+class dcr_workflow {
   uid_t id;
   std::string name;
   std::map<uid_t, dcr_event, cmp_uids> event_store;
+
+public:
+  bool is_event_enabled(uid_t event_id);
+
+  void set_event_executed(uid_t event_id);
+
+  std::set<uid_t, cmp_uids> get_lock_set(uid_t event_id);
+
+  std::set<uid_t, cmp_uids> get_inform_set(uid_t event_id);
+
 };
-
-bool is_event_enabled(uid_t event_id);
-
-void set_event_executed(uid_t event_id);

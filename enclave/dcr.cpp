@@ -1,44 +1,74 @@
 #include "dcr.h"
 
-dcr_workflow workflow;
-
-bool is_event_enabled(uid_t event_id) {
-  dcr_event _event = workflow.event_store[event_id];
+bool dcr_workflow::is_event_enabled(uid_t event_id) {
+  dcr_event _event = event_store[event_id];
   if (_event.excluded)
     return false;
 
   for (unsigned int i = 0; i < _event.incoming_relations.conditions.size(); i++) {
-    dcr_event condition_event = workflow.event_store[_event.incoming_relations.conditions[i]];
+    dcr_event condition_event = event_store[_event.incoming_relations.conditions[i]];
     if (!condition_event.executed && !condition_event.excluded)
       return false;
   }
 
   for (unsigned int i = 0; i < _event.incoming_relations.milestones.size(); i++) {
-    if (!workflow.event_store[_event.incoming_relations.milestones[i]].pending)
+    if (!event_store[_event.incoming_relations.milestones[i]].pending)
       return false;
   }
 
   return true;
 }
 
-void set_event_executed(uid_t event_id) {
-  dcr_event _event = workflow.event_store[event_id];
+void dcr_workflow::set_event_executed(uid_t event_id) {
+  dcr_event _event = event_store[event_id];
   _event.executed = true;
   _event.pending = false;
 
   for (unsigned int i = 0; i < _event.outgoing_relations.excludes.size(); i++) {
-    workflow.event_store[_event.outgoing_relations.excludes[i]].excluded = true;
+    event_store[_event.outgoing_relations.excludes[i]].excluded = true;
   }
 
   for (unsigned int i = 0; i < _event.outgoing_relations.includes.size(); i++) {
-    workflow.event_store[_event.outgoing_relations.includes[i]].excluded = false;
+    event_store[_event.outgoing_relations.includes[i]].excluded = false;
   }
 
   for (unsigned int i = 0; i < _event.outgoing_relations.responses.size(); i++) {
-    workflow.event_store[_event.outgoing_relations.responses[i]].pending = true;
+    event_store[_event.outgoing_relations.responses[i]].pending = true;
   }
 }
 
+std::set<uid_t, cmp_uids> dcr_workflow::get_lock_set(uid_t event_id) {
+  std::set<uid_t, cmp_uids> lock_set;
+  std::vector<uid_t> excludes = event_store[event_id].outgoing_relations.excludes;
+  std::vector<uid_t> includes = event_store[event_id].outgoing_relations.includes;
+  std::vector<uid_t> responses = event_store[event_id].outgoing_relations.responses;
+  lock_set.insert(excludes.begin(), excludes.end());
+  lock_set.insert(includes.begin(), includes.end());
+  lock_set.insert(responses.begin(), responses.end());
+
+  std::set<uid_t, cmp_uids> constraints;
+  for each (uid_t state_lock in lock_set) {
+    std::vector<uid_t> conditions = event_store[state_lock].outgoing_relations.conditions;
+    std::vector<uid_t> milestones = event_store[state_lock].outgoing_relations.milestones;
+    constraints.insert(conditions.begin(), conditions.end());
+    constraints.insert(milestones.begin(), milestones.end());
+  }
+  lock_set.insert(constraints.begin(), constraints.end());
+  return lock_set;
+}
+
+std::set<uid_t, cmp_uids> dcr_workflow::get_inform_set(uid_t event_id) {
+  std::set<uid_t, cmp_uids> inform_set;
+  std::set<uid_t, cmp_uids> lock_set = get_lock_set(event_id);
+  std::vector<uid_t> conditions = event_store[event_id].outgoing_relations.conditions;
+  std::vector<uid_t> milestones = event_store[event_id].outgoing_relations.milestones;
+
+  inform_set.insert(lock_set.begin(), lock_set.end());
+  inform_set.insert(conditions.begin(), conditions.end());
+  inform_set.insert(milestones.begin(), milestones.end());
+
+  return inform_set;
+}
 
 //void enclave_create_event(int event_size, enclave_dcr_event* _event_in,
 //	int in_excludes_size, uid_t* in_excludes,

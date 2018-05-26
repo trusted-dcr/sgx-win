@@ -43,6 +43,7 @@ typedef struct entry_t {
   uint32_t term;
   uid_t event;
   uid_t source;
+  bool checkpoint;
   command_tag_t tag;
 } entry_t;
 
