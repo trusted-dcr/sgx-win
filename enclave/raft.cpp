@@ -50,14 +50,13 @@ bool peer::exist_in_log(command_tag_t tag) {
 }
 
 bool peer::exist_in_log(command_tag_t tag, uint32_t& ret_index) {
-  for each (entry_t logged in peer::log) {
+  for each (entry_t logged in log) {
     if (tags_equal(logged.tag, tag)) {
       ret_index = logged.index;
       return true;
     }
-    return false;
   }
-
+  return false;
 }
 
 void peer::set_commit_index(uint32_t new_index) {
@@ -100,3 +99,43 @@ bool peer::locks_aquired() {
   }
   return true;
 }
+
+bool peer::lock_is_resolved(uint32_t index) {
+  entry_t lock = log[index];
+  if (lock.tag.type != LOCK) { //if it's not a lock, it's trivially resolved
+    return true;
+  }
+  for (uint32_t i = index+1; i < commit_index+1; i++) {
+    if(log[i].tag.type != LOCK) // should never be false
+      if (uids_equal(lock.event, log[i].event))
+        return true;
+  }
+  return false;
+}
+
+bool peer::has_unresolved_lock() {
+  for (uint32_t i = last_checkpoint; i < commit_index+1; i++) {
+    entry_t entry = log[i];
+    if (entry.tag.type == LOCK) {
+      if (!lock_is_resolved(i))
+        return false;
+    }
+  }
+  return true;
+}
+
+bool peer::lock_resolve_is_committed(uint32_t entry_id, entry_t out_entry) {
+  entry_t lock = log[entry_id];
+  if (lock.tag.type != LOCK) { //if it's not a lock, there is no next entry
+    return false;
+  }
+  for (uint32_t i = entry_id + 1; i < commit_index +1; i++) {
+    if (uids_equal(log[i].event, lock.event)) {
+      out_entry = log[i];
+      return true;
+    }
+  }
+  return false;
+}
+
+

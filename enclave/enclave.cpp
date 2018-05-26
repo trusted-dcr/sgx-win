@@ -156,10 +156,79 @@ void append_to_log(entry_t entry) {
   update_timeout(); // essentially a heartbeat, so skip one.
 }
 
-uid_t abort_execution() {
+void send_lock_requests(uid_t tag_id) {
+  std::vector<command_req_t> lock_reqs;
+  std::set<uid_t, cmp_uids> lock_set = self.workflow.get_lock_set(self.cluster_event);
+  for each (uid_t event_id in lock_set) {
+    command_req_t req;
+    uid_t event_leader;
+    try {
+      event_leader = self.leader_map.at(event_id);
+    }
+    catch (const std::exception&) { // no leader for the intended cluster
+      for each (std::pair<uid_t, uid_t> event_peer in self.peer_to_event_map) {
+        if (uids_equal(event_peer.second, event_id)) {
+          self.leader_map[event_id] = event_peer.first;
+          event_leader = event_peer.first;
+        }
+      }
+    }
+    req = {
+      event_leader,       /* target */
+      self.id,            /* source */
+      {
+        tag_id,           /*tag uid*/
+        LOCK              /*tag type*/
+      },                  /* tag */
+      self.cluster_event, /* event */
+      { 0 }               /* mac */
+    };
+    lock_reqs.push_back(req);
+  }
+  mac_and_broadcast_msgs<command_req_t>(lock_reqs, set_mac_flat_msg<command_req_t>, send_command_req);
+}
+
+void send_execution(uid_t tag_id) {
+  std::vector<command_req_t> exec_reqs;
+  std::set<uid_t, cmp_uids> lock_set = self.workflow.get_lock_set(self.cluster_event);
+  std::set<uid_t, cmp_uids> inform_set = self.workflow.get_inform_set(self.cluster_event);
+  for each (uid_t event_id in inform_set) {
+    command_req_t req;
+    uid_t event_leader;
+    try {
+      event_leader = self.leader_map.at(event_id);
+
+    }
+    catch (const std::exception&) { // no leader for the intended cluster
+      for each (std::pair<uid_t, uid_t> event_peer in self.peer_to_event_map) {
+        if (uids_equal(event_peer.second, event_id)) {
+          self.leader_map[event_id] = event_peer.first;
+          event_leader = event_peer.first;
+        }
+      }
+    }
+    req = {
+      event_leader,       /* target */
+      self.id,            /* source */
+      {
+        tag_id,           /*tag uid*/
+        EXEC              /*tag type*/
+      },                  /* tag */
+      self.cluster_event, /* event */
+      { 0 }               /* mac */
+    };
+    exec_reqs.push_back(req);
+    if (lock_set.find(event_id) == lock_set.end()) {
+      self.missing_resp[req.target] = req;
+    }
+  }
+  mac_and_broadcast_msgs<command_req_t>(exec_reqs, set_mac_flat_msg<command_req_t>, send_command_req);
+}
+
+
+void abort_execution(uid_t tag_id) {
   std::vector<command_req_t> abort_reqs;
   std::set<uid_t, cmp_uids> lock_set = self.workflow.get_lock_set(self.cluster_event);
-  uid_t tag_uid = generate_random_uid();
   for each (uid_t event_id in lock_set) {
     command_req_t req;
     uid_t event_leader;
@@ -179,8 +248,8 @@ uid_t abort_execution() {
       event_leader,       /* target */
       self.id,            /* source */
       {
-        tag_uid, /*tag uid*/
-        ABORT                  /*tag type*/
+        tag_id,           /*tag uid*/
+        ABORT             /*tag type*/
       },                  /* tag */
       self.cluster_event, /* event */
       { 0 }               /* mac */
@@ -188,7 +257,6 @@ uid_t abort_execution() {
     abort_reqs.push_back(req);
   }
   mac_and_broadcast_msgs<command_req_t>(abort_reqs, set_mac_flat_msg<command_req_t>, send_command_req);
-  return tag_uid;
 }
 
 void update_commit_index(uint32_t new_index) {
@@ -210,24 +278,54 @@ void update_commit_index(uint32_t new_index) {
   //leader
   std::vector<command_rsp_t> responses;
   for each (entry_t entry in newly_committed) {
-    if (entry.tag.type == ABORT) {
-      if (uids_equal(entry.event, self.cluster_event)) { //we have received an abort on our execution
+    if (entry.tag.type == EXEC) {
+      self.workflow.set_event_executed(entry.event);
+    }
+
+    if (uids_equal(entry.event, self.cluster_event)) { // we own the event
+      switch (entry.tag.type) {
+      case LOCK:
+        send_lock_requests(entry.tag.uid);
+        continue;
+      case EXEC:
+        continue; //do nothing -- executions have already been sent
+      case ABORT:
+        std::set<uid_t, cmp_uids> new_set;
+        self.locked_events = new_set;
         self.locked_entry_index = -1;
+        abort_execution(entry.tag.uid);
+        continue;
       }
     }
-    // abort: if exec our own, tell locked to abort, otherwise remove lock
-    // exec: remove lock, set executed,
-    // lock: ??? tag den i morgen - lock locking-set, and await all responses. if not our own, 
 
-    command_rsp_t rsp = {
-      entry.source, /* target */
-      self.id,      /* source */
-      entry.tag,    /* tag */
-      true,         /* success */
-      self.id,      /* leader */
-      /*some event*//*event*/
-      { 0 }         /* mac */
-    };
+    //we do not own the event
+    command_rsp_t rsp;
+    switch (entry.tag.type) {
+    case LOCK: //lock have been handled at command_req
+      rsp = {
+        entry.source, /* target */
+        self.id, /* source */
+        entry.tag, /* tag */
+        true, /* success */
+        self.id, /* leader */
+        { 0 }/* mac */
+      };
+      break;
+    case EXEC:
+      rsp = {
+        entry.source, /* target */
+        self.id, /* source */
+        entry.tag, /* tag */
+        true, /* success */
+        self.id, /* leader */
+        { 0 }/* mac */
+      };
+      break;
+    case ABORT:
+      if (uids_equal(entry.event, self.log[self.locked_entry_index].event))
+        self.locked_entry_index = -1;
+      break;
+    }
     responses.push_back(rsp);
   }
   mac_and_broadcast_msgs<command_rsp_t>(responses, set_mac_flat_msg<command_rsp_t>, send_command_rsp);
@@ -319,13 +417,13 @@ void recv_command_req(command_req_t req) {
   // check for abort cases, i.e. we're already locked from other place, or we're starting execution, but not enabled
   if (req.tag.type == LOCK) {
   //check for lock
-    if (self.locked_entry_index > 0) { // our event is locked -- two locks is not allowed
+    if (self.has_unresolved_lock()) { // our event is locked -- two locks is not allowed
       command_rsp_t rsp = {
         req.source,   /* target */
         self.id,      /* source */
         { 
-          generate_random_uid(), /*tag uid*/
-          ABORT                  /*tag type*/ 
+          req.tag.uid, /*tag uid*/
+          ABORT        /*tag type*/ 
         },            /* tag */
         true,         /* success */ // check for same lock as already performed
         self.leader,  /* leader */
@@ -342,8 +440,8 @@ void recv_command_req(command_req_t req) {
           req.source,   /* target */
           self.id,      /* source */
           {
-            generate_random_uid(), /*tag uid*/
-            ABORT                  /*tag type*/
+            req.tag.uid, /*tag uid*/
+            ABORT       /*tag type*/
           },            /* tag */
           true,         /* success */ // check for same lock as already performed
           self.leader,  /* leader */
@@ -356,9 +454,6 @@ void recv_command_req(command_req_t req) {
       }
     }
   }
-
-  if(self.exist_in_log(req.tag)) // we have already appended this request
-    return;
 
   // all other cases is simply an append to the log
   // entry to be appended in log
@@ -404,7 +499,6 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
   case ABORT: // can only happen if we're executing and a lock was rejected
     if (!self.executing_own_event()) // spurious extra safety check
       return;
-    uid_t tag_id = abort_execution(); //send abort to all locked
     entry = {
       (uint32_t)self.log.size(),    /* index */
       self.term,          /* term */
@@ -412,7 +506,7 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
       self.id,            /* source */
       false,              /* checkpoint */
       {
-        tag_id,
+        generate_random_uid(),
         ABORT
       }                   /* tag */
     };
@@ -423,10 +517,41 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
       self.missing_resp.erase(rsp.source); 
     break;
   case LOCK:
-    // if the lock has been released, tell them
-    self.locked_events.push_back(self.peer_to_event_map[rsp.source]);
-    if (self.locks_aquired()) {
-      //HER
+    uint32_t lock_index;
+    if (!self.exist_in_log(rsp.tag, lock_index))
+      return; //should never happen
+    if (self.lock_is_resolved(lock_index)) { // if the lock has been released, tell them how
+      entry_t resolve_entry;
+      if (self.lock_resolve_is_committed(lock_index, resolve_entry)) {
+        command_req_t req = {
+          rsp.source,         /* target */
+          self.id,            /* source */
+          resolve_entry.tag,  /* tag */
+          resolve_entry.event,/* event */
+          { 0 }               /* mac */
+          };
+        mac_and_send_msg<command_req_t>(req, set_mac_flat_msg<command_req_t>, send_command_req);
+      }
+      return; // lock is resolved, and we have send respose if committed
+    }
+
+    //lock is not resolved
+    self.locked_events.insert(self.peer_to_event_map[rsp.source]);
+    if (self.locks_aquired()) { // we have gained all locks
+      uid_t tag_id = generate_random_uid();
+      send_execution(tag_id);
+      entry_t entry = {
+        self.log.size(),  /* index */
+        self.term,        /* term */
+        self.cluster_event,/* event */
+        self.id,       /* source */
+        false,            /* checkpoint */
+        {
+          tag_id,
+          EXEC
+        }           /* tag */
+      };
+      append_to_log(entry);
     }
     break;
   }
@@ -474,7 +599,7 @@ void recv_append_req(append_req_t req) {
     }
 
     if (req.commit_index > self.get_commit_index()) {
-      update_commit_index(std::min(req.commit_index, (uint32_t)self.log.size()));
+      update_commit_index(std::min(req.commit_index, (uint32_t)self.log.size()-1));
     }
 
     append_rsp_t rsp = {
@@ -512,7 +637,7 @@ void recv_append_rsp(append_rsp_t rsp) {
   else { // follower behind, send missing entries
     entry_t prev = self.log[rsp.prev_index - 1]; //check indexing!?
     entry_t* entries = &(self.log[rsp.prev_index]);
-    uint32_t entries_n = self.log.size() - rsp.prev_index;
+    uint32_t entries_n = self.log.size()-1 - rsp.prev_index;
     append_req_t req = {
       rsp.source,   /* target */
       self.id,            /* source */

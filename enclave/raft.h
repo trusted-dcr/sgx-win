@@ -29,7 +29,8 @@ public:
   std::map<uid_t, uid_t, cmp_uids> peer_to_event_map;
   std::map<uid_t, uid_t, cmp_uids> leader_map;
   std::map<uid_t, command_req_t, cmp_uids> missing_resp;
-  std::vector<uid_t> locked_events;
+  std::set<uid_t, cmp_uids> locked_events;
+  uint32_t last_checkpoint;
 
   //misc raft data
   role_t role;
@@ -79,6 +80,12 @@ public:
 
   bool locks_aquired();
 
+  //may not be committed
+  bool lock_is_resolved(uint32_t index);
+
+  bool has_unresolved_lock();
+
+  bool lock_resolve_is_committed(uint32_t entry_id, entry_t out_entry);
 };
 
 
