@@ -21,9 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sgx_daemon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="enclave_u.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -51,11 +48,11 @@
     <ClInclude Include="protos\sgxd.pb.h">
       <Filter>Generated Files\protos</Filter>
     </ClInclude>
+    <ClInclude Include="ocall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sgx_daemon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="enclave_u.c">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -82,6 +79,12 @@
     </ClCompile>
     <ClCompile Include="protos\sgxd.pb.cc">
       <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="ocall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

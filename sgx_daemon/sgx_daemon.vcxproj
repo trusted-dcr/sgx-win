@@ -341,7 +341,7 @@
     <ClInclude Include="protos\raft.pb.h" />
     <ClInclude Include="protos\sgxd.grpc.pb.h" />
     <ClInclude Include="protos\sgxd.pb.h" />
-    <ClInclude Include="sgx_daemon.h" />
+    <ClInclude Include="ocall.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="enclave_u.c">
@@ -362,6 +362,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="protos\crypto.grpc.pb.cc" />
     <ClCompile Include="protos\crypto.pb.cc" />
     <ClCompile Include="protos\network.grpc.pb.cc" />
@@ -370,7 +371,7 @@
     <ClCompile Include="protos\raft.pb.cc" />
     <ClCompile Include="protos\sgxd.grpc.pb.cc" />
     <ClCompile Include="protos\sgxd.pb.cc" />
-    <ClCompile Include="sgx_daemon.cpp" />
+    <ClCompile Include="ocall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\enclave\enclave.edl">
