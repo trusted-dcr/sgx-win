@@ -1,7 +1,7 @@
 @echo off
 
 set PROTOC=protoc
-set GRPC="C:\Program Files\vcpkg\installed\x64-windows\tools\grpc\grpc_cpp_plugin.exe"
+set GRPC=grpc_cpp_plugin
 
 set SOLUTION_DIR=..\..
 set PROJECT_DIR=..
