@@ -1,7 +1,7 @@
 @echo off
 
 set PROTOC=protoc
-set GRPC=grpc_cpp_plugin
+set GRPC="%GRPC_PLUGIN_PATH%\grpc_cpp_plugin.exe"
 
 set SOLUTION_DIR=..\..
 set PROJECT_DIR=..
