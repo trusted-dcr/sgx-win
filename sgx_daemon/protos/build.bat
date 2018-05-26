@@ -14,4 +14,5 @@ set PROJECT_DIR=..
     %SOLUTION_DIR%\tdcr-proto\protos\crypto.proto^
     %SOLUTION_DIR%\tdcr-proto\protos\network.proto^
     %SOLUTION_DIR%\tdcr-proto\protos\raft.proto^
-    %SOLUTION_DIR%\tdcr-proto\protos\sgxd.proto
+    %SOLUTION_DIR%\tdcr-proto\protos\sgxd.proto^
+    %SOLUTION_DIR%\tdcr-proto\protos\netd.proto

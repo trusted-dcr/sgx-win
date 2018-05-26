@@ -54,6 +54,15 @@
     <ClInclude Include="enclave_handle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="daemon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\netd.grpc.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\netd.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="enclave_u.c">
@@ -88,6 +97,15 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="daemon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\netd.grpc.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\netd.pb.cc">
+      <Filter>Generated Files\protos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

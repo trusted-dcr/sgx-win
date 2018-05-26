@@ -161,7 +161,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -182,7 +182,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -203,7 +203,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -224,7 +224,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -249,7 +249,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -274,7 +274,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -299,7 +299,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -324,7 +324,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -332,10 +332,13 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="daemon.h" />
     <ClInclude Include="enclave_u.h" />
     <ClInclude Include="enclave_handle.h" />
     <ClInclude Include="protos\crypto.grpc.pb.h" />
     <ClInclude Include="protos\crypto.pb.h" />
+    <ClInclude Include="protos\netd.grpc.pb.h" />
+    <ClInclude Include="protos\netd.pb.h" />
     <ClInclude Include="protos\network.grpc.pb.h" />
     <ClInclude Include="protos\network.pb.h" />
     <ClInclude Include="protos\raft.grpc.pb.h" />
@@ -345,6 +348,7 @@
     <ClInclude Include="ocall.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="daemon.cpp" />
     <ClCompile Include="enclave_u.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
       </PrecompiledHeader>
@@ -366,6 +370,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="protos\crypto.grpc.pb.cc" />
     <ClCompile Include="protos\crypto.pb.cc" />
+    <ClCompile Include="protos\netd.grpc.pb.cc" />
+    <ClCompile Include="protos\netd.pb.cc" />
     <ClCompile Include="protos\network.grpc.pb.cc" />
     <ClCompile Include="protos\network.pb.cc" />
     <ClCompile Include="protos\raft.grpc.pb.cc" />
@@ -403,6 +409,5 @@
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>
