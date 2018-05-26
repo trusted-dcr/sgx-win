@@ -51,6 +51,9 @@
     <ClInclude Include="ocall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="enclave_handle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="enclave_u.c">

@@ -333,6 +333,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="enclave_u.h" />
+    <ClInclude Include="enclave_handle.h" />
     <ClInclude Include="protos\crypto.grpc.pb.h" />
     <ClInclude Include="protos\crypto.pb.h" />
     <ClInclude Include="protos\network.grpc.pb.h" />
