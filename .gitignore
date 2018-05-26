@@ -1,4 +1,5 @@
-sgx_daemon/protos/
+sgx_daemon/protos/*
+!sgx_daemon/protos/*.bat
 
 *.pem
 

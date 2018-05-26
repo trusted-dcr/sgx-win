@@ -164,11 +164,8 @@
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">
@@ -188,11 +185,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -212,11 +206,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">
@@ -236,11 +227,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <AdditionalDependencies>sgx_urts_sim.lib;sgx_uae_service_sim.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -264,11 +252,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">
@@ -292,11 +277,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -320,11 +302,8 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
@@ -348,18 +327,20 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <AdditionalDependencies>sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>mkdir $(ProjectDir)protos;
-protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)protos\^
-    $(SolutionDir)tdcr-proto\protos\crypto.proto^
-    $(SolutionDir)tdcr-proto\protos\network.proto^
-    $(SolutionDir)tdcr-proto\protos\raft.proto</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="enclave_u.h" />
+    <ClInclude Include="protos\crypto.grpc.pb.h" />
     <ClInclude Include="protos\crypto.pb.h" />
+    <ClInclude Include="protos\network.grpc.pb.h" />
     <ClInclude Include="protos\network.pb.h" />
+    <ClInclude Include="protos\raft.grpc.pb.h" />
     <ClInclude Include="protos\raft.pb.h" />
+    <ClInclude Include="protos\sgxd.grpc.pb.h" />
+    <ClInclude Include="protos\sgxd.pb.h" />
     <ClInclude Include="sgx_daemon.h" />
   </ItemGroup>
   <ItemGroup>
@@ -381,9 +362,14 @@ protoc --proto_path=$(SolutionDir)tdcr-proto\protos --cpp_out=$(ProjectDir)proto
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="protos\crypto.grpc.pb.cc" />
     <ClCompile Include="protos\crypto.pb.cc" />
+    <ClCompile Include="protos\network.grpc.pb.cc" />
     <ClCompile Include="protos\network.pb.cc" />
+    <ClCompile Include="protos\raft.grpc.pb.cc" />
     <ClCompile Include="protos\raft.pb.cc" />
+    <ClCompile Include="protos\sgxd.grpc.pb.cc" />
+    <ClCompile Include="protos\sgxd.pb.cc" />
     <ClCompile Include="sgx_daemon.cpp" />
   </ItemGroup>
   <ItemGroup>
