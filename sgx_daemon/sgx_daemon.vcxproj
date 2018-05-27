@@ -336,17 +336,17 @@
     <ClInclude Include="daemon.h" />
     <ClInclude Include="enclave_u.h" />
     <ClInclude Include="enclave_handle.h" />
+    <ClInclude Include="ocall.h" />
     <ClInclude Include="protos\crypto.grpc.pb.h" />
     <ClInclude Include="protos\crypto.pb.h" />
-    <ClInclude Include="protos\netd.grpc.pb.h" />
-    <ClInclude Include="protos\netd.pb.h" />
+    <ClInclude Include="protos\dcr.grpc.pb.h" />
+    <ClInclude Include="protos\dcr.pb.h" />
     <ClInclude Include="protos\network.grpc.pb.h" />
     <ClInclude Include="protos\network.pb.h" />
     <ClInclude Include="protos\raft.grpc.pb.h" />
     <ClInclude Include="protos\raft.pb.h" />
     <ClInclude Include="protos\sgxd.grpc.pb.h" />
     <ClInclude Include="protos\sgxd.pb.h" />
-    <ClInclude Include="ocall.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="convert.cpp" />
@@ -370,17 +370,17 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ocall.cpp" />
     <ClCompile Include="protos\crypto.grpc.pb.cc" />
     <ClCompile Include="protos\crypto.pb.cc" />
-    <ClCompile Include="protos\netd.grpc.pb.cc" />
-    <ClCompile Include="protos\netd.pb.cc" />
+    <ClCompile Include="protos\dcr.grpc.pb.cc" />
+    <ClCompile Include="protos\dcr.pb.cc" />
     <ClCompile Include="protos\network.grpc.pb.cc" />
     <ClCompile Include="protos\network.pb.cc" />
     <ClCompile Include="protos\raft.grpc.pb.cc" />
     <ClCompile Include="protos\raft.pb.cc" />
     <ClCompile Include="protos\sgxd.grpc.pb.cc" />
     <ClCompile Include="protos\sgxd.pb.cc" />
-    <ClCompile Include="ocall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\enclave\enclave.edl">

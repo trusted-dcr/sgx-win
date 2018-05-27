@@ -8,7 +8,7 @@ namespace convert {
 	}
 
 	void from_wire(tdcr::crypto::Mac128 from, sgx_cmac_128bit_tag_t& to) {
-		*(uint64_t*)&to = from.part1();
+		*(uint64_t*)&to[0] = from.part1();
 		*(uint64_t*)&to[8] = from.part2();
 	}
 
@@ -31,7 +31,7 @@ namespace convert {
 
 	tdcr::crypto::Mac128 to_wire(sgx_cmac_128bit_tag_t from) {
 		tdcr::crypto::Mac128 to;
-		to.set_part1(*(uint64_t*)&from);
+		to.set_part1(*(uint64_t*)&from[0]);
 		to.set_part2(*(uint64_t*)&from[8]);
 		return to;
 	}
@@ -82,7 +82,8 @@ namespace convert {
 		to.term = payload.term();
 		to.prev_term = payload.prev_term();
 		to.prev_index = payload.prev_index();
-		
+		to.commit_index = payload.commit_index();
+
 		to.entries_n = payload.entries_size();
 		to.entries = new entry_t[to.entries_n];
 		for (uint32_t i = 0; i < to.entries_n; i++)
@@ -244,6 +245,8 @@ namespace convert {
 		tdcr::raft::LogResponse payload;
 		payload.set_success(from.success);
 		payload.set_allocated_leader(new tdcr::network::Uid(to_wire(from.leader)));
+		for (uint32_t i = 0; i < from.entries_n; i++)
+			*payload.add_entries() = to_wire(from.entries[i]);
 		return pack_container(from, payload, tdcr::network::Container_PayloadType::Container_PayloadType_LOG_RESPONSE);
 	}
 }

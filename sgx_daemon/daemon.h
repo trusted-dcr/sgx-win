@@ -1,12 +1,12 @@
 #pragma once
 #include <grpcpp/grpcpp.h>
 #include "protos/sgxd.grpc.pb.h"
-#include "protos/netd.grpc.pb.h"
+//#include "protos/netd.grpc.pb.h"
 
 class daemon {
 public:
 	std::shared_ptr<grpc::ChannelInterface> net_channel;
-	std::unique_ptr<tdcr::netd::NetDaemon::Stub> net_stub;
+	//std::unique_ptr<tdcr::netd::NetDaemon::Stub> net_stub;
 	unsigned short port;
 
 	daemon(unsigned short port, unsigned short net_port);

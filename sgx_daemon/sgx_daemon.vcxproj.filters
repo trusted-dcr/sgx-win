@@ -24,30 +24,6 @@
     <ClInclude Include="enclave_u.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="protos\raft.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\crypto.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\network.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\crypto.grpc.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\network.grpc.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\raft.grpc.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\sgxd.grpc.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\sgxd.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
     <ClInclude Include="ocall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -57,43 +33,43 @@
     <ClInclude Include="daemon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="protos\netd.grpc.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
-    <ClInclude Include="protos\netd.pb.h">
-      <Filter>Generated Files\protos</Filter>
-    </ClInclude>
     <ClInclude Include="convert.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\crypto.grpc.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\crypto.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\dcr.grpc.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\dcr.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\network.grpc.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\network.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\raft.grpc.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\raft.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\sgxd.grpc.pb.h">
+      <Filter>Generated Files\protos</Filter>
+    </ClInclude>
+    <ClInclude Include="protos\sgxd.pb.h">
+      <Filter>Generated Files\protos</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="enclave_u.c">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\raft.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\crypto.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\network.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\crypto.grpc.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\network.grpc.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\raft.grpc.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\sgxd.grpc.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\sgxd.pb.cc">
-      <Filter>Generated Files\protos</Filter>
     </ClCompile>
     <ClCompile Include="ocall.cpp">
       <Filter>Source Files</Filter>
@@ -104,14 +80,38 @@
     <ClCompile Include="daemon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="protos\netd.grpc.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
-    <ClCompile Include="protos\netd.pb.cc">
-      <Filter>Generated Files\protos</Filter>
-    </ClCompile>
     <ClCompile Include="convert.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\crypto.grpc.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\crypto.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\dcr.grpc.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\dcr.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\network.grpc.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\network.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\raft.grpc.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\raft.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\sgxd.grpc.pb.cc">
+      <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="protos\sgxd.pb.cc">
+      <Filter>Generated Files\protos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

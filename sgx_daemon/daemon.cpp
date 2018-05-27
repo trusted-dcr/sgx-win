@@ -7,7 +7,7 @@ daemon::daemon(unsigned short port, unsigned short net_port) {
 		std::string("localhost:") + std::to_string(net_port),
 		grpc::InsecureChannelCredentials());
 
-	net_stub = tdcr::netd::NetDaemon::NewStub(net_channel);
+	//net_stub = tdcr::netd::NetDaemon::NewStub(net_channel);
 }
 
 void daemon::start_daemon() {
@@ -25,14 +25,14 @@ void daemon::start_daemon() {
 void daemon::net_async_send(tdcr::network::Container& cont) {
 	grpc::ClientContext context;
 	grpc::CompletionQueue queue;
-	net_stub->AsyncSend(&context, cont, &queue);
+	//net_stub->AsyncSend(&context, cont, &queue);
 }
 
 void daemon::net_register() {
 	grpc::ClientContext context;
 	google::protobuf::Empty request;
 	google::protobuf::Empty response;
-	net_stub->Register(&context, request, &response);
+	//net_stub->Register(&context, request, &response);
 }
 
 grpc::Status daemon::SgxDaemonImpl::Config(grpc::ServerContext* context, const tdcr::sgxd::SgxConfig* conf, google::protobuf::Empty* response) {
