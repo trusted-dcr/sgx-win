@@ -1,3 +1,4 @@
+
 enclave {
     include "msg.h"
 
@@ -31,6 +32,20 @@ enclave {
 		 [in, count=excludes_count] uid_t* dcr_excludes_out, [in, count=excludes_count] uid_t* dcr_excludes_in, uint32_t excludes_count,
 		 [in, count=responses_count] uid_t* dcr_responses_out, [in, count=responses_count] uid_t* dcr_responses_in, uint32_t responses_count,
 		 [in, count=peer_map_count] uid_t* peer_map_peers, [in, count=peer_map_count] uid_t* peer_map_events, uint32_t peer_map_count);
+
+#ifdef SGX_DEBUG
+        public command_req_t test_set_mac_command_req(command_req_t req);
+        public command_rsp_t test_set_mac_command_rsp(command_rsp_t rsp);
+
+        public append_req_t test_set_mac_append_req(append_req_t req);
+        public append_rsp_t test_set_mac_append_rsp(append_rsp_t rsp);
+
+        public poll_req_t test_set_mac_poll_req(poll_req_t req);
+        public poll_rsp_t test_set_mac_poll_rsp(poll_rsp_t rsp);
+
+        public election_req_t test_set_mac_election_req(election_req_t req);
+        public election_rsp_t test_set_mac_election_rsp(election_rsp_t rsp);
+#endif
 	};
     untrusted {
 		void send_command_req(command_req_t req);

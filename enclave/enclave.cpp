@@ -835,7 +835,102 @@ void provision_enclave(
   uid_t* dcr_responses_out, uid_t* dcr_responses_in, uint32_t responses_count,
   uid_t* peer_map_peers, uid_t* peer_map_events, uint32_t peer_map_count
  ){
+  //recreate intermediate
+  intermediate_dcr_worflow wf = {
+    event_ids, /* event_ids */
+    events_count, /* events_count */
+    excluded, /* excluded */
+    excluded_count,/* excluded_count */
+    pending, /* pending */
+    pending_count, /* pending_count */
+    executed, /* executed */
+    executed_count, /* executed_count */
+    dcr_conditions_out, /* dcr_conditions_out */
+    dcr_conditions_in, /* dcr_conditions_in */
+    conditions_count, /* conditions_count */
+    dcr_milestones_out, /* dcr_milestones_out */
+    dcr_milestones_in, /* dcr_milestones_in */
+    milestones_count, /* milestones_count */
+    dcr_includes_out, /* dcr_includes_out */
+    dcr_includes_in, /* dcr_includes_in */
+    includes_count, /* includes_count */
+    dcr_excludes_out, /* dcr_excludes_out */
+    dcr_excludes_in, /* dcr_excludes_in */
+    excluded_count, /* excludes_count */
+    dcr_responses_out,/* dcr_responses_out */
+    dcr_responses_in, /* dcr_responses_in */
+    responses_count/* responses_count */
+  };
+
+  //transform intermediate
+  self.workflow = self.workflow.make_workflow(wf,wf_name);
+  self.workflow.id = wf_id;
   self.id = self_id;
   //dcr_workflow* wf = (dcr_workflow*)self_workflow;
   self.cluster_event = self_cluster_event;
 }
+
+#ifdef SGX_DEBUG
+command_req_t test_set_mac_command_req(command_req_t req) {
+  sgx_status_t status;
+  status = set_mac_flat_msg<command_req_t>(&req);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return req;
+}
+command_rsp_t test_set_mac_command_rsp(command_rsp_t rsp) {
+  sgx_status_t status;
+  status = set_mac_flat_msg<command_rsp_t>(&rsp);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return rsp;
+}
+
+append_req_t test_set_mac_append_req(append_req_t req) {
+  sgx_status_t status;
+  status = set_mac_append_req(&req);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return req;
+}
+
+append_rsp_t test_set_mac_append_rsp(append_rsp_t rsp) {
+  sgx_status_t status;
+  status = set_mac_flat_msg<append_rsp_t>(&rsp);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return rsp;
+}
+
+poll_req_t test_set_mac_poll_req(poll_req_t req) {
+  sgx_status_t status;
+  status = set_mac_flat_msg<poll_req_t>(&req);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return req;
+}
+
+poll_rsp_t test_set_mac_poll_rsp(poll_rsp_t rsp) {
+  sgx_status_t status;
+  status = set_mac_flat_msg<poll_rsp_t>(&rsp);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return rsp;
+}
+
+election_req_t test_set_mac_election_req(election_req_t req) {
+  sgx_status_t status;
+  status = set_mac_flat_msg<election_req_t>(&req);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return req;
+}
+
+election_rsp_t test_set_mac_election_rsp(election_rsp_t rsp) {
+  sgx_status_t status;
+  status = set_mac_flat_msg<election_rsp_t>(&rsp);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return rsp;
+}
+#endif // SGX_DEBUF

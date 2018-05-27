@@ -36,5 +36,6 @@ public:
   std::set<uid_t, cmp_uids> get_inform_set(uid_t event_id);
 
   intermediate_dcr_worflow create_intermediate();
-  dcr_workflow make_workflow(intermediate_dcr_worflow wf);
+
+  dcr_workflow make_workflow(intermediate_dcr_worflow wf, char* name);
 };

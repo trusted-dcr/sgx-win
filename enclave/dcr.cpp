@@ -144,3 +144,47 @@ intermediate_dcr_worflow dcr_workflow::create_intermediate() {
 
   return temp;
 }
+
+dcr_workflow dcr_workflow::make_workflow(intermediate_dcr_worflow wf, char* name) {
+  dcr_workflow new_wf;
+  new_wf.name = std::string(name);
+
+  //set ids
+  for (uint32_t i = 0; i < wf.events_count; i++) {
+    dcr_event event;
+    event.id = wf.event_ids[i];
+    new_wf.event_store[event.id] = event;
+  }
+
+  //set event state
+  for (uint32_t i = 0; i < wf.excluded_count; i++) {
+    new_wf.event_store[wf.excluded[i]].excluded = true;
+  }
+  for (uint32_t i = 0; i < wf.pending_count; i++) {
+    new_wf.event_store[wf.pending[i]].pending = true;
+  }
+  for (uint32_t i = 0; i < wf.executed_count; i++) {
+    new_wf.event_store[wf.executed[i]].executed = true;
+  }
+
+  // set relations
+  for (int i = 0; i < wf.conditions_count; i++) {
+    new_wf.conditions_to[wf.dcr_conditions_out[i]].push_back(wf.dcr_conditions_in[i]);
+    new_wf.conditions_from[wf.dcr_conditions_in[i]].push_back(wf.dcr_conditions_out[i]);
+  }
+  for (int i = 0; i < wf.milestones_count; i++) {
+    new_wf.milestones_to[wf.dcr_milestones_out[i]].push_back(wf.dcr_milestones_in[i]);
+    new_wf.milestones_from[wf.dcr_milestones_in[i]].push_back(wf.dcr_milestones_out[i]);
+  }
+  for (int i = 0; i < wf.excludes_count; i++) {
+    new_wf.excludes_to[wf.dcr_excludes_out[i]].push_back(wf.dcr_excludes_in[i]);
+  }
+  for (int i = 0; i < wf.includes_count; i++) {
+    new_wf.includes_to[wf.dcr_includes_out[i]].push_back(wf.dcr_includes_in[i]);
+  }
+  for (int i = 0; i < wf.responses_count; i++) {
+    new_wf.responses_to[wf.dcr_responses_out[i]].push_back(wf.dcr_responses_in[i]);
+  }
+
+  return new_wf;
+}

@@ -1,6 +1,7 @@
 #pragma once
 #include <tchar.h>
 #include <map>
+#include <chrono>
 #include "sgx_urts.h"
 #include "enclave_u.h"
 #include "dcr.h"
