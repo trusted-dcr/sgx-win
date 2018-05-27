@@ -36,6 +36,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="convert_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="enclave_tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -298,9 +298,7 @@
     <ClInclude Include="test_objects.h" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <ClCompile Include="convert_tests.cpp" />
-=======
     <ClCompile Include="enclave_tests.cpp" />
     <ClCompile Include="enclave_u.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
