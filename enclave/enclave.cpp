@@ -92,6 +92,18 @@ void mac_and_send_append_req(append_req_t msg) {
   send_append_req(msg,msg.entries,msg.entries_n);
 }
 
+void becomme_leader() {
+  self.last_checkpoint = self.find_latest_checkpoint();
+  uint32_t index;
+  if (self.has_unresolved_lock(index)) {
+    self.locked_entry_index = index;
+  }
+  else {
+    self.locked_entry_index = -1;
+  }
+  self.role = LEADER;
+}
+
 void update_timeout() {
   if (self.role == LEADER) {
     self.t = self.now + delta_heartbeat;
@@ -175,7 +187,7 @@ void append_to_log(entry_t entry) {
 
 void retry_requests() {
   bool tried_new_peers = false;
-  
+
   //retry missing responses
   for each (std::pair<uid_t, command_req_t> req in self.missing_resp) {
     command_req_t command = req.second;
@@ -229,7 +241,7 @@ void retry_requests() {
         self.id,       /* source */
         {
           generate_random_uid(),
-          CHECKPOINT 
+          CHECKPOINT
         }       /* tag */
       };
       append_to_log(checkpoint);
@@ -316,7 +328,7 @@ void abort_execution(uid_t tag_id) {
     uid_t event_leader;
     try {
       event_leader = self.leader_map.at(event_id);
-      
+
     }
     catch (const std::exception&) { // no leader for the intended cluster
       for each (std::pair<uid_t,uid_t> event_peer in self.peer_to_event_map) {
@@ -342,7 +354,7 @@ void abort_execution(uid_t tag_id) {
 }
 
 void update_commit_index(uint32_t new_index) {
-  
+
   std::vector<entry_t> newly_committed;
   for (uint32_t i = self.get_commit_index() + 1; i <= new_index; i++) {
     newly_committed.push_back(self.log[i]);
@@ -436,7 +448,7 @@ void heartbeat() {
       placeholder,            /* entries */
       0,                      /* entries_n */
       { 0 }                   /* mac */
-    };    
+    };
     heartbeats.push_back(heartbeat);
   }
   mac_and_broadcast_append_req(heartbeats);
@@ -459,11 +471,11 @@ void start_poll() {
   }
   mac_and_broadcast_msgs<poll_req_t>(polls, set_mac_flat_msg<poll_req_t>, send_poll_req);
 }
- 
+
 //ECALLS
 
 void recv_command_req(command_req_t req) {
-  bool valid = false; 
+  bool valid = false;
   validate_flat_msg<command_req_t>(&req, valid);
   if (!valid)
     return;
@@ -511,9 +523,9 @@ void recv_command_req(command_req_t req) {
       command_rsp_t rsp = {
         req.source,   /* target */
         self.id,      /* source */
-        { 
+        {
           req.tag.uid, /*tag uid*/
-          ABORT        /*tag type*/ 
+          ABORT        /*tag type*/
         },            /* tag */
         true,         /* success */ // check for same lock as already performed
         self.leader,  /* leader */
@@ -524,7 +536,7 @@ void recv_command_req(command_req_t req) {
       return;
     }
   // we're not locked -- check lock-event and possibly enabledness
-    if (uids_equal(req.event, self.cluster_event)) { // we are being locked on our cluster's event id, i.e we're starting an executing 
+    if (uids_equal(req.event, self.cluster_event)) { // we are being locked on our cluster's event id, i.e we're starting an executing
       if (!self.workflow.is_event_enabled(self.cluster_event)) {  // we cannot execute our event, and must reject the command
         command_rsp_t rsp = {
           req.source,   /* target */
@@ -578,7 +590,7 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
   if (!rsp.success) { //replace leader in missing_resp and leader_map
     uid_t new_leader = rsp.leader;
     if (rsp.tag.type == EXEC && self.missing_resp.find(rsp.source) != self.missing_resp.end()) { // EXEC should be in missing_resp - change it to the new leader
-      command_req_t req = self.missing_resp[rsp.source]; 
+      command_req_t req = self.missing_resp[rsp.source];
       self.missing_resp.erase(rsp.source);
       self.missing_resp[new_leader] = req;
     }
@@ -606,7 +618,7 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
     break;
   case EXEC:
     if(self.missing_resp.find(rsp.source) != self.missing_resp.end())
-      self.missing_resp.erase(rsp.source); 
+      self.missing_resp.erase(rsp.source);
     break;
   case LOCK:
     uint32_t lock_index;
@@ -669,7 +681,7 @@ void recv_append_req(append_req_t req) {
   // follower_recv logic
   if (uids_equal(req.source, self.leader))
     update_timeout();
-    
+
   if (!self.term_and_index_exist_in_log(req.prev_term, req.prev_index)) { // we're not up to date, requst old appends
     append_rsp_t rsp = {
       req.source,       /*target*/
@@ -709,7 +721,7 @@ void recv_append_req(append_req_t req) {
 
 void recv_append_rsp(append_rsp_t rsp) {
   bool valid = verify_mac_and_own_term<append_rsp_t>(&rsp, validate_flat_msg<append_rsp_t>);
-  
+
   if (!valid)
     return;
 
@@ -734,11 +746,11 @@ void recv_append_rsp(append_rsp_t rsp) {
       self.term,          /* term */
       prev.term,          /* prev_term */
       prev.index,         /* prev_index */
-      self.get_commit_index(),  /* commit_index */ 
+      self.get_commit_index(),  /* commit_index */
       entries,      /* entries */
       entries_n,    /* entries_n */
       { 0 }         /* mac */
-    };    
+    };
     mac_and_send_append_req(req);
   }
 }
@@ -783,7 +795,7 @@ void recv_poll_rsp(poll_rsp_t rsp) {
   if (rsp.success)
     self.poll_votes++;
   if (self.poll_votes > self.cluster_size / 2) {
-    start_election();      
+    start_election();
   }
 }
 
@@ -837,6 +849,9 @@ void recv_election_rsp(election_rsp_t rsp) {
 
   becomme_leader();
 }
+
+void recv_log_req(log_req_t req) {}
+void recv_log_rsp(log_rsp_t rsp) {}
 
 void timeout() {
   if (self.role == LEADER) {
@@ -919,7 +934,7 @@ void provision_enclave(
   self.cluster_members = find_cluster_members(self.peer_to_event_map, self.cluster_event);
   self.cluster_size = self.cluster_members.size();
   self.locked_entry_index = -1;
-  
+
   self.update_term(0, uid_t { 0, 0 }); //(initial leader?)
 }
 

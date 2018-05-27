@@ -34,6 +34,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup>
+    <VcpkgConfiguration Condition="'$(Configuration)' == 'Simulation'">Debug</VcpkgConfiguration>
+  </PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81A7CA81-BF0A-4132-A726-05A20BCD4CBC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -335,7 +338,6 @@
     <ClInclude Include="convert.h" />
     <ClInclude Include="daemon.h" />
     <ClInclude Include="enclave_handle.h" />
-    <ClInclude Include="ocall.h" />
     <ClInclude Include="enclave_u.h" />
     <ClInclude Include="protos\crypto.grpc.pb.h" />
     <ClInclude Include="protos\crypto.pb.h" />
@@ -369,7 +371,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="ocall.cpp" />
     <ClCompile Include="protos\crypto.grpc.pb.cc" />
     <ClCompile Include="protos\crypto.pb.cc" />

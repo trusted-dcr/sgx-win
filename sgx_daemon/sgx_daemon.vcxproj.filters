@@ -24,9 +24,6 @@
     <ClInclude Include="enclave_u.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ocall.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="enclave_handle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -78,9 +75,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="ocall.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="daemon.cpp">

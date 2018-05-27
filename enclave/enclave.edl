@@ -17,6 +17,9 @@ enclave {
         public void recv_election_req(election_req_t req);
         public void recv_election_rsp(election_rsp_t rsp);
 
+        public void recv_log_req(log_req_t req);
+        public void recv_log_rsp(log_rsp_t rsp);
+
 		public void provision_enclave(
 		 uid_t self_id,
 		 uid_t wf_id,
@@ -73,6 +76,7 @@ enclave {
         void send_election_req(election_req_t req);
         void send_election_rsp(election_rsp_t rsp);
 
-		void request_time();
+        void send_log_req(log_req_t req);
+        void send_log_rsp(log_rsp_t rsp);
     };
 };

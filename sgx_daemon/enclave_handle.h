@@ -55,6 +55,14 @@ public:
 		return recv_election_rsp(eid, rsp);
 	}
 
+	sgx_status_t e_recv_log_req(log_req_t req) {
+		return recv_log_req(eid, req);
+	}
+
+	sgx_status_t e_recv_log_rsp(log_rsp_t rsp) {
+		return recv_log_rsp(eid, rsp);
+	}
+
   sgx_status_t e_set_time() {
     uint64_t ticks = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     return set_time(eid, ticks);
@@ -83,7 +91,7 @@ public:
     flatten_map(peer_to_event_map, peer_map_peers, peer_map_events);
     uint32_t peer_map_count = peer_to_event_map.size();
     sgx_status_t status = provision_enclave(
-      eid,        
+      eid,
       peer_id,                /* self_id */
       wf_id,                  /* wf_id */
       (char*)workflow.name.c_str(),  /* wf_name */

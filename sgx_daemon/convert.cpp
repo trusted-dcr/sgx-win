@@ -4,7 +4,9 @@ namespace convert {
 	/** FROM WIRE **/
 
 	uid_t from_wire(tdcr::network::Uid from) {
-		return uid_t { from.part1(), from.part2() };
+		return uid_t {
+			from.part1(), from.part2()
+		};
 	}
 
 	void from_wire(tdcr::crypto::Mac128 from, sgx_cmac_128bit_tag_t& to) {
