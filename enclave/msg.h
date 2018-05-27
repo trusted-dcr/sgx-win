@@ -9,6 +9,7 @@ typedef struct uid_t {
 } uid_t;
 
 /* COMMAND TYPES */
+
 typedef enum command_type_t {
   LOCK,
   ABORT,
@@ -39,6 +40,7 @@ typedef struct command_rsp_t {
 } command_rsp_t;
 
 /* APPEND TYPES */
+
 typedef struct entry_t {
   uint32_t index;
   uint32_t term;
@@ -71,6 +73,7 @@ typedef struct append_rsp_t {
 } append_rsp_t;
 
 /* POLL TYPES */
+
 typedef struct poll_req_t {
   uid_t target;
   uid_t source;
@@ -89,6 +92,7 @@ typedef struct poll_rsp_t {
 } poll_rsp_t;
 
 /* ELECTION TYPES */
+
 typedef struct election_req_t {
   uid_t target;
   uid_t source;
@@ -106,6 +110,7 @@ typedef struct election_rsp_t {
   sgx_cmac_128bit_tag_t mac;
 } election_rsp_t;
 
+/* LOG TYPES */
 
 typedef struct log_req_t {
 	uid_t target;
