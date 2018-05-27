@@ -25,7 +25,7 @@ typedef struct command_req_t {
   uid_t target;
   uid_t source;
   command_tag_t tag;
-  uid_t event; 
+  uid_t event;
   sgx_cmac_128bit_tag_t mac;
 } command_req_t;
 
@@ -105,3 +105,20 @@ typedef struct election_rsp_t {
   bool success;
   sgx_cmac_128bit_tag_t mac;
 } election_rsp_t;
+
+
+typedef struct log_req_t {
+	uid_t target;
+	uid_t source;
+	sgx_cmac_128bit_tag_t mac;
+} log_req_t;
+
+typedef struct log_rsp_t {
+	uid_t target;
+	uid_t source;
+	bool success;
+	uid_t leader;
+	entry_t* entries;
+	uint32_t entries_n;
+	sgx_cmac_128bit_tag_t mac;
+} log_rsp_t;
