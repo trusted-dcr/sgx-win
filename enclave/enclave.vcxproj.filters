@@ -56,6 +56,9 @@
     <ClInclude Include="msg_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="intermediate_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="enclave_private.pem">

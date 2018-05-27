@@ -14,8 +14,8 @@ bool entry_equal(const entry_t& lhs, const entry_t& rhs) {
 }
 
 uid_t generate_random_uid() {
-  unsigned char* rand1 = new unsigned char[8];
-  unsigned char* rand2 = new unsigned char[8];
+  unsigned char rand1[8];
+  unsigned char rand2[8];
   uid_t id;
   sgx_status_t status;
   do {

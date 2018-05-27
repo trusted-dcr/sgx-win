@@ -12,7 +12,8 @@ typedef struct uid_t {
 typedef enum command_type_t {
   LOCK,
   ABORT,
-  EXEC
+  EXEC,
+  CHECKPOINT
 } command_type_t;
 
 typedef struct command_tag_t {
@@ -43,7 +44,6 @@ typedef struct entry_t {
   uint32_t term;
   uid_t event;
   uid_t source;
-  bool checkpoint;
   command_tag_t tag;
 } entry_t;
 

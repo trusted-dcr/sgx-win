@@ -1,3 +1,4 @@
+#include <iterator>
 #include "raft.h"
 //
 //void open_pse() {
@@ -113,15 +114,22 @@ bool peer::lock_is_resolved(uint32_t index) {
   return false;
 }
 
-bool peer::has_unresolved_lock() {
-  for (uint32_t i = last_checkpoint; i < commit_index+1; i++) {
+bool peer::has_unresolved_lock(uint32_t& out_val) {
+  for (uint32_t i = last_checkpoint; i < commit_index + 1; i++) {
     entry_t entry = log[i];
     if (entry.tag.type == LOCK) {
-      if (!lock_is_resolved(i))
+      if (!lock_is_resolved(i)) {
+        out_val = i;
         return false;
+      }
     }
   }
   return true;
+}
+
+bool peer::has_unresolved_lock() {
+  uint32_t placeholder;
+  return has_unresolved_lock(placeholder);
 }
 
 bool peer::lock_resolve_is_committed(uint32_t entry_id, entry_t out_entry) {
@@ -136,6 +144,15 @@ bool peer::lock_resolve_is_committed(uint32_t entry_id, entry_t out_entry) {
     }
   }
   return false;
+}
+
+uint32_t peer::find_latest_checkpoint() {
+  for (int i = log.size() - 1; i >= 0; i--) {
+    entry_t entry = log[i];
+    if (entry.tag.type == CHECKPOINT)
+      return i;
+  }
+  return 0;
 }
 
 

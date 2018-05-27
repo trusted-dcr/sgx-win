@@ -50,7 +50,6 @@ public:
   uint64_t t_min;
   uint64_t t;
   uint64_t now;
-  uint64_t lock_time;
   //sgx_thread_mutex_t* time_lock;
 
   //lock
@@ -83,9 +82,13 @@ public:
   //may not be committed
   bool lock_is_resolved(uint32_t index);
 
+  bool has_unresolved_lock(uint32_t& out_val);
+
   bool has_unresolved_lock();
 
   bool lock_resolve_is_committed(uint32_t entry_id, entry_t out_entry);
+
+  uint32_t find_latest_checkpoint();
 };
 
 

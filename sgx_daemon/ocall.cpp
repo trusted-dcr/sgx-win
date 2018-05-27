@@ -1,4 +1,5 @@
 #include "enclave_u.h"
+#include "ocall.h"
 
 void request_time() {
 
@@ -11,6 +12,8 @@ void send_command_req(command_req_t req) {
 void send_command_rsp(command_rsp_t rsp) {
 
 }
+
+void send_append_req(append_req_t req) {}
 
 void send_append_req(append_req_t req, entry_t* entries, int size) {
 

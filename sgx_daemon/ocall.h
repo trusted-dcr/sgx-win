@@ -4,7 +4,6 @@
 void request_time();
 void send_command_req(command_req_t req);
 void send_command_rsp(command_rsp_t rsp);
-void send_append_req(append_req_t req);
 void send_append_rsp(append_rsp_t rsp);
 void send_poll_req(poll_req_t req);
 void send_poll_rsp(poll_rsp_t rsp);

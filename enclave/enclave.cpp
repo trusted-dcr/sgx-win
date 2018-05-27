@@ -88,6 +88,18 @@ void mac_and_send_append_req(append_req_t msg) {
   send_append_req(msg,msg.entries,msg.entries_n);
 }
 
+void becomme_leader() {
+  self.last_checkpoint = self.find_latest_checkpoint();
+  uint32_t index;
+  if (self.has_unresolved_lock(index)) {
+    self.locked_entry_index = index;
+  } 
+  else {
+    self.locked_entry_index = -1;
+  }
+  self.role = LEADER;
+}
+
 void update_timeout() {
   if (self.role == LEADER) {
     self.t = self.now + delta_heartbeat;
@@ -154,6 +166,40 @@ void append_to_log(entry_t entry) {
   mac_and_broadcast_append_req(appends);
 
   update_timeout(); // essentially a heartbeat, so skip one.
+}
+
+void retry_requests() {
+  for each (std::pair<uid_t, command_req_t> req in self.missing_resp) {
+    mac_and_send_msg<command_req_t>(req.second, set_mac_flat_msg<command_req_t>, send_command_req);
+  }
+  if (self.locked_entry_index >= 0) { //resend lock, if unlock was missed
+    entry_t lock = self.log[self.locked_entry_index];
+    command_rsp_t rsp = {
+      lock.source, /* target */
+      self.id, /* source */
+      lock.tag, /* tag */
+      true, /* success */
+      self.id, /* leader */
+      { 0 }/* mac */
+    };
+    mac_and_send_msg<command_rsp_t>(rsp, set_mac_flat_msg<command_rsp_t>, send_command_rsp);
+  }
+  else {
+    if (self.missing_resp.size() == 0 && self.last_checkpoint < self.get_commit_index()) { //not locked, no missing responses, and updated since last checkpoint
+      entry_t checkpoint = {
+        self.log.size(),  /* index */
+        self.term,        /* term */
+        self.cluster_event,        /* event */
+        self.id,       /* source */
+        {
+          generate_random_uid(),
+          CHECKPOINT 
+        }       /* tag */
+      };
+      append_to_log(checkpoint);
+      self.last_checkpoint = checkpoint.index;
+    }
+  }
 }
 
 void send_lock_requests(uid_t tag_id) {
@@ -278,6 +324,10 @@ void update_commit_index(uint32_t new_index) {
   //leader
   std::vector<command_rsp_t> responses;
   for each (entry_t entry in newly_committed) {
+    if (entry.tag.type == CHECKPOINT) { //placeholder entry as checkpoint
+      self.last_checkpoint = entry.index;
+      continue;
+    }
     if (entry.tag.type == EXEC) {
       self.workflow.set_event_executed(entry.event);
     }
@@ -462,7 +512,6 @@ void recv_command_req(command_req_t req) {
     self.term,        /* term */
     req.event,        /* event */
     req.source,       /* source */
-    false,            /* checkpoint */
     req.tag           /* tag */
   };
 
@@ -504,7 +553,6 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
       self.term,          /* term */
       self.cluster_event, /* event */
       self.id,            /* source */
-      false,              /* checkpoint */
       {
         generate_random_uid(),
         ABORT
@@ -545,7 +593,6 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
         self.term,        /* term */
         self.cluster_event,/* event */
         self.id,       /* source */
-        false,            /* checkpoint */
         {
           tag_id,
           EXEC
@@ -613,7 +660,6 @@ void recv_append_req(append_req_t req) {
       { 0 }               /*mac*/
     };
     mac_and_send_msg<append_rsp_t>(rsp, set_mac_flat_msg<append_rsp_t>, send_append_rsp);
-
   }
 }
 
@@ -746,22 +792,13 @@ void recv_election_rsp(election_rsp_t rsp) {
   }
   heartbeat(); //victorious heartbeat message
 
-  //HERE missing some checks for unresolved locks
-  self.role = LEADER;
+  becomme_leader();
 }
-
-void intialize() {
-  //self.time_lock = new sgx_thread_mutex_t();
-  //sgx_thread_mutex_init(self.time_lock,NULL);
-  //self.time_lock->m_control = SGX_THREAD_MUTEX_RECURSIVE;
-  self.locked_entry_index = -1;
-}
-
-//time functions
 
 void timeout() {
   if (self.role == LEADER) {
     heartbeat();
+    retry_requests();
     update_timeout();
   }
   if (self.role == CANDIDATE) {
@@ -779,4 +816,26 @@ void set_time(uint64_t ticks) {
   self.now = ticks;
   if (self.now > self.t)
     timeout();
+}
+
+
+void provision_enclave(
+  uid_t self_id,
+  uid_t self_cluster_event,
+  uid_t wf_id,
+  char* wf_name,
+  uid_t* event_ids, uint32_t events_count,
+  uid_t* excluded, uint32_t excluded_count,
+  uid_t* pending, uint32_t pending_count,
+  uid_t* executed, uint32_t executed_count,
+  uid_t* dcr_conditions_out, uid_t* dcr_conditions_in, uint32_t conditions_count,
+  uid_t* dcr_milestones_out, uid_t* dcr_milestones_in, uint32_t milestones_count,
+  uid_t* dcr_includes_out, uid_t* dcr_includes_in, uint32_t includes_count,
+  uid_t* dcr_excludes_out, uid_t* dcr_excludes_in, uint32_t excludes_count,
+  uid_t* dcr_responses_out, uid_t* dcr_responses_in, uint32_t responses_count,
+  uid_t* peer_map_peers, uid_t* peer_map_events, uint32_t peer_map_count
+ ){
+  self.id = self_id;
+  //dcr_workflow* wf = (dcr_workflow*)self_workflow;
+  self.cluster_event = self_cluster_event;
 }
