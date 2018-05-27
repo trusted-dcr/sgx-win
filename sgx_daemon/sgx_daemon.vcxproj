@@ -332,6 +332,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="convert.h" />
     <ClInclude Include="daemon.h" />
     <ClInclude Include="enclave_u.h" />
     <ClInclude Include="enclave_handle.h" />
@@ -348,6 +349,7 @@
     <ClInclude Include="ocall.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="convert.cpp" />
     <ClCompile Include="daemon.cpp" />
     <ClCompile Include="enclave_u.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
