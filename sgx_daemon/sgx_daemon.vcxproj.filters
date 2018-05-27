@@ -21,6 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClInclude Include="enclave_u.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -37,6 +38,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="protos\crypto.grpc.pb.h">
+=======
+    <ClInclude Include="protos\raft.pb.h">
+>>>>>>> dcr tests
       <Filter>Generated Files\protos</Filter>
     </ClInclude>
     <ClInclude Include="protos\crypto.pb.h">
@@ -66,8 +70,12 @@
     <ClInclude Include="protos\sgxd.pb.h">
       <Filter>Generated Files\protos</Filter>
     </ClInclude>
+    <ClInclude Include="enclave_u.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClCompile Include="enclave_u.c">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -84,6 +92,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="protos\crypto.grpc.pb.cc">
+=======
+    <ClCompile Include="protos\raft.pb.cc">
+>>>>>>> dcr tests
       <Filter>Generated Files\protos</Filter>
     </ClCompile>
     <ClCompile Include="protos\crypto.pb.cc">
@@ -112,6 +123,9 @@
     </ClCompile>
     <ClCompile Include="protos\sgxd.pb.cc">
       <Filter>Generated Files\protos</Filter>
+    </ClCompile>
+    <ClCompile Include="enclave_u.c">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

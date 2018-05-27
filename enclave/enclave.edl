@@ -1,4 +1,4 @@
-
+#define SGX_DEBUG
 enclave {
     include "msg.h"
 
@@ -45,6 +45,12 @@ enclave {
 
         public election_req_t test_set_mac_election_req(election_req_t req);
         public election_rsp_t test_set_mac_election_rsp(election_rsp_t rsp);
+
+		public void test_execute(uid_t event_id);
+		public bool test_is_enabled(uid_t event_id);
+		public bool test_is_executed(uid_t event_id);
+		public bool test_is_pending(uid_t event_id);
+		public bool test_is_excluded(uid_t event_id);
 #endif
 	};
     untrusted {

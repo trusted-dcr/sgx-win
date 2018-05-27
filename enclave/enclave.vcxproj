@@ -332,6 +332,7 @@
   <ItemGroup>
     <ClInclude Include="crypto.h" />
     <ClInclude Include="dcr.h" />
+    <ClInclude Include="enclave_helpers.h" />
     <ClInclude Include="enclave_t.h" />
     <ClInclude Include="intermediate_types.h" />
     <ClInclude Include="msg.h" />

@@ -1,7 +1,6 @@
 #include <string>
 #include "enclave_t.h"
-#include "dcr.h"
-#include "raft.h"
+#include "enclave_helpers.h"
 
 peer self;
 
@@ -856,21 +855,49 @@ void provision_enclave(
     includes_count, /* includes_count */
     dcr_excludes_out, /* dcr_excludes_out */
     dcr_excludes_in, /* dcr_excludes_in */
-    excluded_count, /* excludes_count */
+    excludes_count, /* excludes_count */
     dcr_responses_out,/* dcr_responses_out */
     dcr_responses_in, /* dcr_responses_in */
     responses_count/* responses_count */
   };
+  self.id = self_id;
+  self.cluster_event = self_cluster_event;
 
   //transform intermediate
   self.workflow = self.workflow.make_workflow(wf,wf_name);
   self.workflow.id = wf_id;
-  self.id = self_id;
-  //dcr_workflow* wf = (dcr_workflow*)self_workflow;
-  self.cluster_event = self_cluster_event;
+
+  self.peer_to_event_map = create_peer_to_event_map(peer_map_peers, peer_map_events, peer_map_count);
+  self.leader_map = pick_leaders(self.peer_to_event_map);
+  self.last_checkpoint = 0;
+  self.role = FOLLOWER;
+  self.cluster_members = find_cluster_members(self.peer_to_event_map, self.cluster_event);
+  self.cluster_size = self.cluster_members.size();
+  self.locked_entry_index = -1;
+  
+  self.update_term(0, uid_t { 0, 0 }); //(initial leader?)
 }
 
 #ifdef SGX_DEBUG
+void test_execute(uid_t event_id) {
+  self.workflow.set_event_executed(event_id);
+}
+
+bool test_is_enabled(uid_t event_id) {
+  return self.workflow.is_event_enabled(event_id);
+}
+
+bool test_is_executed(uid_t event_id) {
+  return self.workflow.event_store[event_id].executed;
+}
+
+bool test_is_pending(uid_t event_id) {
+  return self.workflow.event_store[event_id].pending;
+}
+
+bool test_is_excluded(uid_t event_id) {
+  return self.workflow.event_store[event_id].excluded;
+}
 command_req_t test_set_mac_command_req(command_req_t req) {
   sgx_status_t status;
   status = set_mac_flat_msg<command_req_t>(&req);

@@ -19,6 +19,10 @@ public:
 		return sgx_create_enclave(ENCLAVE_FILE, SGX_DEBUG_FLAG, &token, &updated, &eid, NULL);
 	}
 
+  sgx_status_t destroy_enclave() {
+    return sgx_destroy_enclave(eid);
+  }
+
 	sgx_status_t e_recv_command_req(command_req_t req) {
 		return recv_command_req(eid, req);
 	}
@@ -63,15 +67,17 @@ public:
       peers.push_back(pair.first);
       events.push_back(pair.second);
     }
-    peers_list = &peers[0];
-    events_list = &events[0];
+    if(peers.size() > 0)
+      peers_list = &peers[0];
+    if (events.size() > 0)
+      events_list = &events[0];
   }
 
   sgx_status_t e_provision_enclave(uid_t peer_id, dcr_workflow workflow, uid_t cluster_event_id, std::map<uid_t, uid_t, cmp_uids> peer_to_event_map) {
     uid_t wf_id = workflow.id;
     intermediate_dcr_worflow temp = workflow.create_intermediate();
-    uid_t* peer_map_peers;
-    uid_t* peer_map_events;
+    uid_t* peer_map_peers = new uid_t[peer_to_event_map.size()];
+    uid_t* peer_map_events = new uid_t[peer_to_event_map.size()];
     flatten_map(peer_to_event_map, peer_map_peers, peer_map_events);
     uint32_t peer_map_count = peer_to_event_map.size();
     sgx_status_t status = provision_enclave(
@@ -111,4 +117,82 @@ public:
       return status;
     return e_set_time();
   }
+
+#ifdef SGX_DEBUG
+  void e_test_execute(uid_t event_id) {
+    sgx_status_t status = test_execute(eid, event_id);
+  }
+
+  bool e_test_is_enabled(uid_t event_id) {
+    bool ret;
+    sgx_status_t status = test_is_enabled(eid, &ret, event_id);
+    return ret;
+  }
+
+  bool e_test_is_executed(uid_t event_id) {
+    bool ret;
+    sgx_status_t status = test_is_executed(eid, &ret, event_id);
+    return ret;
+  }
+
+  bool e_test_is_pending(uid_t event_id) {
+    bool ret;
+    sgx_status_t status = test_is_pending(eid, &ret, event_id);
+    return ret;
+  }
+
+  bool e_test_is_excluded(uid_t event_id) {
+    bool ret;
+    sgx_status_t status = test_is_excluded(eid, &ret, event_id);
+    return ret;
+  }
+
+  command_req_t e_test_set_mac_command_req(command_req_t req) {
+    command_req_t ret;
+    sgx_status_t status = test_set_mac_command_req(eid, &ret, req);
+    return ret;
+  }
+
+  command_rsp_t e_test_set_mac_command_rsp(command_rsp_t rsp) {
+    command_rsp_t ret;
+    sgx_status_t status = test_set_mac_command_rsp(eid, &ret, rsp);
+    return ret;
+  }
+
+  append_req_t e_test_set_mac_append_req(append_req_t req) {
+    append_req_t ret;
+    sgx_status_t status = test_set_mac_append_req(eid, &ret, req);
+    return ret;
+  }
+
+  append_rsp_t e_test_set_mac_append_rsp(append_rsp_t rsp) {
+    append_rsp_t ret;
+    sgx_status_t status = test_set_mac_append_rsp(eid, &ret, rsp);
+    return ret;
+  }
+
+  poll_req_t e_test_set_mac_poll_req(poll_req_t req) {
+    poll_req_t ret;
+    sgx_status_t status = test_set_mac_poll_req(eid, &ret, req);
+    return ret;
+  }
+
+  poll_rsp_t e_test_set_mac_poll_rsp(poll_rsp_t rsp) {
+    poll_rsp_t ret;
+    sgx_status_t status = test_set_mac_poll_rsp(eid, &ret, rsp);
+    return ret;
+  }
+
+  election_req_t e_test_set_mac_election_req(election_req_t req) {
+    election_req_t ret;
+    sgx_status_t status = test_set_mac_election_req(eid, &ret, req);
+    return ret;
+  }
+
+  election_rsp_t e_test_set_mac_election_rsp(election_rsp_t rsp) {
+    election_rsp_t ret;
+    sgx_status_t status = test_set_mac_election_rsp(eid, &ret, rsp);
+    return ret;
+  }
+#endif
 };
