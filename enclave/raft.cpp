@@ -82,8 +82,7 @@ uint32_t peer::largest_majority_index() {
   }
 
   std::sort(indices_vector.begin(), indices_vector.end());
-
-  uint32_t index = indices_vector[indices_vector.size() / 2 - 1];
+  uint32_t index = indices_vector[(indices_vector.size() - 1) / 2];
  
   return index;
 }

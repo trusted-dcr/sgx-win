@@ -47,7 +47,6 @@ enclave {
 
         public bool test_verify_mac_poll_req(poll_req_t req);
 
-
 		public void test_execute(uid_t event_id);
 		public bool test_is_enabled(uid_t event_id);
 		public bool test_is_executed(uid_t event_id);
@@ -58,6 +57,7 @@ enclave {
 		public uid_t test_event_of_peer(uid_t peer_id);
 		public uint32_t test_size_of_event_cluster();
 
+		public bool test_is_leader();
 #endif
 	};
     untrusted {

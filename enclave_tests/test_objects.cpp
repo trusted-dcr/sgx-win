@@ -148,3 +148,81 @@ std::map<uid_t, uid_t, cmp_uids> six_peers_two_peer_per_event_peer_map() {
   peer_map[{0, 6}] = { 0,3 };
   return peer_map;
 }
+
+command_req_t empty_command_req(uid_t target, uid_t source) {
+  return command_req_t();
+}
+
+command_rsp_t empty_command_rsp(uid_t target, uid_t source) {
+  return command_rsp_t();
+}
+
+append_req_t empty_append_req(uid_t target, uid_t source) {
+  append_req_t req = {
+    uid_t{ 0,2 },
+    uid_t{ 0,1 },
+    1,
+    0,
+    0,
+    0,
+    NULL,
+    0,
+    { 0 }
+  };
+
+  return req;
+}
+
+append_rsp_t empty_append_rsp(uid_t target, uid_t source) {
+  append_rsp_t rsp1 = {
+    target,
+    source,
+    0,
+    0,
+    0,
+    true,
+    0,
+    { 0 }
+  };
+  return rsp1;
+}
+
+election_req_t empty_election_req(uid_t target, uid_t source) {
+  return election_req_t();
+}
+
+election_rsp_t empty_election_rsp(uid_t target, uid_t source) {
+  return election_rsp_t();
+}
+
+log_req_t empty_log_req(uid_t target, uid_t source) {
+  return log_req_t();
+}
+
+log_rsp_t empty_log_rsp(uid_t target, uid_t source) {
+  return log_rsp_t();
+}
+
+poll_req_t empty_poll_req(uid_t target, uid_t source) {
+  poll_req_t req1 = {
+    target,
+    source,
+    0,
+    0,
+    0,
+    { 0 }
+  };
+
+  return req1;
+}
+
+poll_rsp_t empty_poll_rsp(uid_t target, uid_t source) {
+  poll_rsp_t rsp = {
+    target,
+    source,
+    0,
+    true,
+    {0}
+  };
+  return rsp;
+}

@@ -153,6 +153,10 @@ typedef struct ms_test_size_of_event_cluster_t {
 	uint32_t ms_retval;
 } ms_test_size_of_event_cluster_t;
 
+typedef struct ms_test_is_leader_t {
+	bool ms_retval;
+} ms_test_is_leader_t;
+
 typedef struct ms_send_command_req_t {
 	command_req_t ms_req;
 } ms_send_command_req_t;
@@ -559,6 +563,15 @@ sgx_status_t test_size_of_event_cluster(sgx_enclave_id_t eid, uint32_t* retval)
 	sgx_status_t status;
 	ms_test_size_of_event_cluster_t ms;
 	status = sgx_ecall(eid, 26, &ocall_table_enclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t test_is_leader(sgx_enclave_id_t eid, bool* retval)
+{
+	sgx_status_t status;
+	ms_test_is_leader_t ms;
+	status = sgx_ecall(eid, 27, &ocall_table_enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }

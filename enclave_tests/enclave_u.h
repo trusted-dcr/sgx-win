@@ -52,6 +52,7 @@ sgx_status_t test_is_excluded(sgx_enclave_id_t eid, bool* retval, uid_t event_id
 sgx_status_t test_leader_of_event(sgx_enclave_id_t eid, uid_t* retval, uid_t event_id);
 sgx_status_t test_event_of_peer(sgx_enclave_id_t eid, uid_t* retval, uid_t peer_id);
 sgx_status_t test_size_of_event_cluster(sgx_enclave_id_t eid, uint32_t* retval);
+sgx_status_t test_is_leader(sgx_enclave_id_t eid, bool* retval);
 
 #ifdef __cplusplus
 }

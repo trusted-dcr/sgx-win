@@ -224,5 +224,11 @@ public:
     sgx_status_t status = test_size_of_event_cluster(eid, &ret);
     return ret;
   }
+
+  bool e_test_is_leader() {
+    bool ret;
+    sgx_status_t status = test_is_leader(eid, &ret);
+    return ret;
+  }
 #endif
 };

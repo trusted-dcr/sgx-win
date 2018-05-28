@@ -150,6 +150,8 @@ void append_to_log(entry_t entry) {
 
   std::vector<append_req_t> appends;
   for each (uid_t member in self.cluster_members) {
+    if (uids_equal(member, self.id))
+      continue;
     append_req_t req = {
       member,                   /* target */
       self.id,                  /* source */
@@ -308,7 +310,7 @@ void abort_execution(uid_t tag_id) {
 void update_commit_index(uint32_t new_index) {
   
   std::vector<entry_t> newly_committed;
-  for (uint32_t i = self.get_commit_index() + 1; i < new_index; i++) {
+  for (uint32_t i = self.get_commit_index() + 1; i <= new_index; i++) {
     newly_committed.push_back(self.log[i]);
   }
 
@@ -755,9 +757,9 @@ void recv_election_req(election_req_t req) {
   }
   // follower.recv logic:
   bool valid_election_request = uids_equal(self.endorsement, empty_uid) && //// we have not voted yet AND
-                                (self.last_entry().term < req.last_term || // ( their term is higher OR
-                                self.last_entry().term == req.last_term && // their term is same AND
-                                self.last_entry().index <= req.last_index); //their INDEX is higher)
+                                !(self.last_entry().term > req.last_term || // NOT ( our term is higher OR
+                                self.last_entry().term == req.last_term && // our term is same AND
+                                self.last_entry().index > req.last_index); //our INDEX is higher)
   election_rsp_t rsp = {
     req.source,             /* target */
     self.id,                /* source */
@@ -981,5 +983,9 @@ uid_t test_event_of_peer(uid_t peer_id) {
 
 uint32_t test_size_of_event_cluster() {
   return self.cluster_size;
+}
+
+bool test_is_leader() {
+  return self.role == LEADER;
 }
 #endif // SGX_DEBUG
