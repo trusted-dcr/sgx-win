@@ -92,18 +92,6 @@ void mac_and_send_append_req(append_req_t msg) {
   send_append_req(msg,msg.entries,msg.entries_n);
 }
 
-void becomme_leader() {
-  self.last_checkpoint = self.find_latest_checkpoint();
-  uint32_t index;
-  if (self.has_unresolved_lock(index)) {
-    self.locked_entry_index = index;
-  } 
-  else {
-    self.locked_entry_index = -1;
-  }
-  self.role = LEADER;
-}
-
 void update_timeout() {
   if (self.role == LEADER) {
     self.t = self.now + delta_heartbeat;
@@ -120,6 +108,18 @@ void update_timeout() {
   self.t = self.t_min + r;
 }
 
+void becomme_leader() {
+  self.last_checkpoint = self.find_latest_checkpoint();
+  uint32_t index;
+  if (self.has_unresolved_lock(index)) {
+    self.locked_entry_index = index;
+  }
+  else {
+    self.locked_entry_index = -1;
+  }
+  self.role = LEADER;
+  update_timeout();
+}
 bool min_time_exceeded() {
   return self.now > self.t_min;
 }
@@ -174,13 +174,42 @@ void append_to_log(entry_t entry) {
 }
 
 void retry_requests() {
+  bool tried_new_peers = false;
+  
+  //retry missing responses
   for each (std::pair<uid_t, command_req_t> req in self.missing_resp) {
-    mac_and_send_msg<command_req_t>(req.second, set_mac_flat_msg<command_req_t>, send_command_req);
+    command_req_t command = req.second;
+    if (self.leader_map.find(self.peer_to_event_map[command.target]) != self.leader_map.end()) // set target to new leader, if that's been updated
+      command.target = self.leader_map[self.peer_to_event_map[command.target]];
+    if (self.retried_responses) {
+      command.target = self.find_other_peer_in_cluster(command.target);
+      tried_new_peers = true;
+    }
+    mac_and_send_msg<command_req_t>(command, set_mac_flat_msg<command_req_t>, send_command_req);
   }
+
+  if (self.missing_resp.size() > 0 && !tried_new_peers) {
+    self.retried_responses = true;
+  }
+  else {
+    self.retried_responses = false;
+  }
+
   if (self.locked_entry_index >= 0) { //resend lock, if unlock was missed
     entry_t lock = self.log[self.locked_entry_index];
+    uid_t lock_source = lock.source;
+    if (self.leader_map.find(self.peer_to_event_map[lock.source]) != self.leader_map.end())
+      lock_source = self.leader_map[self.peer_to_event_map[lock.source]];
+    if (self.retried_unlock) {
+      lock_source = self.find_other_peer_in_cluster(lock_source);
+      self.retried_unlock = false;
+    }
+    else {
+      self.retried_unlock = true;
+    }
+
     command_rsp_t rsp = {
-      lock.source, /* target */
+      lock_source, /* target */
       self.id, /* source */
       lock.tag, /* tag */
       true, /* success */
@@ -188,8 +217,10 @@ void retry_requests() {
       { 0 }/* mac */
     };
     mac_and_send_msg<command_rsp_t>(rsp, set_mac_flat_msg<command_rsp_t>, send_command_rsp);
+    self.retried_unlock = true;
   }
   else {
+    self.retried_unlock = false;
     if (self.missing_resp.size() == 0 && self.last_checkpoint < self.get_commit_index()) { //not locked, no missing responses, and updated since last checkpoint
       entry_t checkpoint = {
         self.log.size(),  /* index */
@@ -783,7 +814,6 @@ void recv_election_req(election_req_t req) {
     self.endorsement = req.source;
 
   mac_and_send_msg<election_rsp_t>(rsp, set_mac_flat_msg<election_rsp_t>, send_election_rsp);
-
 }
 
 void recv_election_rsp(election_rsp_t rsp) {
@@ -875,6 +905,8 @@ void provision_enclave(
   };
   self.id = self_id;
   self.log.push_back(get_empty_entry());
+  self.retried_unlock = false;
+  self.retried_responses = false;
 
   //transform intermediate
   self.workflow = self.workflow.make_workflow(wf,wf_name);

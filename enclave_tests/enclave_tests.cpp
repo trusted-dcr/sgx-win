@@ -22,6 +22,8 @@ std::vector<poll_rsp_t> poll_rsps;
 std::vector<election_req_t> election_reqs;
 std::vector<election_rsp_t> election_rsps;
 
+bool simulate = false;
+
 void make_leader(enclave_handle* eh, uid_t target, std::vector<uid_t> quorum, uint32_t new_term) {
   for each (uid_t peer in quorum) {
     poll_rsp_t rsp = empty_poll_rsp(target, peer);
@@ -623,7 +625,65 @@ public:
       eh.e_recv_append_req(req1);
 
       Assert::IsTrue(eh.e_test_is_executed({ 0,1 }));
+    }
 
+    TEST_METHOD(hearbeat_test) {
+      dcr_workflow wf = wf_DU_DE();
+      std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
+      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      std::vector<uid_t> quorum;
+      quorum.push_back({ 0,2 });
+      make_leader(&eh, { 0,1 }, quorum, 1);
+
+      append_reqs.clear();
+      election_reqs.clear();
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delta_heartbeat
+      eh.e_set_time();
+
+      Assert::IsTrue(append_reqs.size() == 1);
+    }
+
+    TEST_METHOD(missing_resp_test) {
+      leader_lock_msg_exec_sequence_test(); //leaves us in state with one missing response
+      command_reqs.clear();
+      append_reqs.clear();
+      
+      Assert::IsTrue(command_reqs.size() == 0);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
+      eh.e_set_time();
+
+      Assert::IsTrue(command_reqs.size() == 1);
+      Assert::IsTrue(uids_equal(command_reqs[0].target, { 0,3 }));
+      Assert::IsTrue(append_reqs.size() == 1);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
+      eh.e_set_time();
+
+      Assert::IsTrue(command_reqs.size() == 2);
+      Assert::IsTrue(uids_equal(command_reqs[1].target, { 0,4 })); //test retry
+      Assert::IsTrue(append_reqs.size() == 2);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(600)); //delta_heartbeat = 500
+      eh.e_set_time();
+
+      Assert::IsTrue(command_reqs.size() == 3);
+      Assert::IsTrue(uids_equal(command_reqs[2].target, { 0,3 })); //test retry
+      Assert::IsTrue(append_reqs.size() == 3);
+    }
+  };
+  TEST_CLASS(simulation) {
+public:
+    enclave_handle eh;
+
+    TEST_METHOD_INITIALIZE(setup) {
+      eh.init_enclave();
+    }
+
+    TEST_METHOD_CLEANUP(teardown) {
+      eh.destroy_enclave();
+      simulate = false;
     }
   };
 }

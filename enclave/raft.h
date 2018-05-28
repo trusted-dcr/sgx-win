@@ -50,6 +50,8 @@ public:
   uint64_t t_min;
   uint64_t t;
   uint64_t now;
+  bool retried_responses;
+  bool retried_unlock;
   //sgx_thread_mutex_t* time_lock;
 
   //lock
@@ -89,6 +91,8 @@ public:
   bool lock_resolve_is_committed(uint32_t entry_id, entry_t out_entry);
 
   uint32_t find_latest_checkpoint();
+
+  uid_t find_other_peer_in_cluster(uid_t old_source);
 };
 
 

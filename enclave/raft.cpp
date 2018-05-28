@@ -154,4 +154,34 @@ uint32_t peer::find_latest_checkpoint() {
   return 0;
 }
 
+uid_t peer::find_other_peer_in_cluster(uid_t old_source) {
+  //first find the relevant cluster
+  uid_t event_id = { 0 };
+  for each (std::pair<uid_t, uid_t> peer_to_event in peer_to_event_map) {
+    if (uids_equal(peer_to_event.first, old_source)) {
+      event_id = peer_to_event.second;
+    }
+  }
+  
+  //then find all peers in the same cluster
+  std::vector<uid_t> cluster_peers;
+  for each (std::pair<uid_t,uid_t> peer_to_event in peer_to_event_map) {
+    if (uids_equal(peer_to_event.second, event_id) && 
+      !uids_equal(peer_to_event.first, old_source) && 
+      !uids_equal(peer_to_event.first, id)) //this last check should never happen
+    { 
+      cluster_peers.push_back(peer_to_event.first);
+    }
+  }
+  if(cluster_peers.size() == 0)
+    return old_source; //no alternatives found
+
+  //then choose a random new peer
+  uint64_t buf;
+  sgx_read_rand((unsigned char*)&buf, 4);
+  buf = buf % cluster_peers.size();
+
+  return cluster_peers[buf];
+}
+
 
