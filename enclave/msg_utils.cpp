@@ -33,7 +33,7 @@ entry_t get_empty_entry() {
     0, /* term */
     {0,0}, /* event */
     {0,0}, /* source */
-    CHECKPOINT/* tag */
+    {generate_random_uid(), CHECKPOINT }/* tag */
   };
   return entry;
 }

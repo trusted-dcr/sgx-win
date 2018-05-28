@@ -137,7 +137,7 @@ std::map<uid_t, uid_t, cmp_uids> one_peer_per_event_peer_map() {
   return peer_map;
 }
 
-//six peer map on two event
+//six peer map on three event
 std::map<uid_t, uid_t, cmp_uids> six_peers_two_peer_per_event_peer_map() {
   std::map<uid_t, uid_t, cmp_uids> peer_map;
   peer_map[{0, 1}] = { 0,1 };
@@ -149,18 +149,49 @@ std::map<uid_t, uid_t, cmp_uids> six_peers_two_peer_per_event_peer_map() {
   return peer_map;
 }
 
+//ten peer map on 5 event
+std::map<uid_t, uid_t, cmp_uids> ten_peers_two_peer_per_event_peer_map() {
+  std::map<uid_t, uid_t, cmp_uids> peer_map;
+  peer_map[{0, 1}] = { 0,1 };
+  peer_map[{0, 2}] = { 0,1 };
+  peer_map[{0, 3}] = { 0,2 };
+  peer_map[{0, 4}] = { 0,2 };
+  peer_map[{0, 5}] = { 0,3 };
+  peer_map[{0, 6}] = { 0,3 };
+  peer_map[{0, 7}] = { 0,4 };
+  peer_map[{0, 8}] = { 0,4 };
+  peer_map[{0, 9}] = { 0,5 };
+  peer_map[{0, 10}] = { 0,5 };
+  return peer_map;
+}
+
 command_req_t empty_command_req(uid_t target, uid_t source) {
-  return command_req_t();
+  command_req_t req = {
+    target,
+    source,
+    command_tag_t {{0}, CHECKPOINT},
+    {0,0},
+    {0},
+  };
+  return req;
 }
 
 command_rsp_t empty_command_rsp(uid_t target, uid_t source) {
-  return command_rsp_t();
+  command_rsp_t rsp = {
+    target,
+    source,
+    command_tag_t {{ 0 }, CHECKPOINT},
+    true,
+    source,
+    { 0 }
+  };
+  return rsp;
 }
 
 append_req_t empty_append_req(uid_t target, uid_t source) {
   append_req_t req = {
-    uid_t{ 0,2 },
-    uid_t{ 0,1 },
+   target,
+    source,
     1,
     0,
     0,
@@ -188,11 +219,26 @@ append_rsp_t empty_append_rsp(uid_t target, uid_t source) {
 }
 
 election_req_t empty_election_req(uid_t target, uid_t source) {
-  return election_req_t();
+  election_req_t req = {
+    target,
+    source,
+    0,
+    0,
+    0,
+    {0}
+  };
+  return req;
 }
 
 election_rsp_t empty_election_rsp(uid_t target, uid_t source) {
-  return election_rsp_t();
+  election_rsp_t rsp = {
+    target,
+    source,
+    0,
+    true,
+    {0}
+  };
+  return rsp;
 }
 
 log_req_t empty_log_req(uid_t target, uid_t source) {

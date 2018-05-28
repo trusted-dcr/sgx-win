@@ -53,7 +53,9 @@ std::set<uid_t, cmp_uids> dcr_workflow::get_lock_set(uid_t event_id) {
     constraints.insert(conditions.begin(), conditions.end());
     constraints.insert(milestones.begin(), milestones.end());
   }
-  lock_set.insert(constraints.begin(), constraints.end());
+  for each (uid_t constraint in constraints) {
+    lock_set.emplace(constraint);
+  }
   return lock_set;
 }
 

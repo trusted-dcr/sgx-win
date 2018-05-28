@@ -403,7 +403,7 @@ public:
       Assert::IsTrue(valid);
     }
 
-    TEST_METHOD(successfull_poll_response) {
+    TEST_METHOD(follower_successfull_poll_response) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
       eh.e_provision_enclave({ 0,1 }, wf, peer_map);
@@ -431,13 +431,15 @@ public:
       Assert::IsTrue(eh.e_test_is_leader());
     }
 
-    TEST_METHOD(exec_is_executing_test) {
+    TEST_METHOD(leader_exec_is_executing_test) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
       eh.e_provision_enclave({ 0,1 }, wf, peer_map);
       std::vector<uid_t> quorum;
       quorum.push_back({ 0,2 });
       make_leader(&eh, { 0,1 }, quorum, 1);
+
+      Assert::IsTrue(append_reqs.size() == 1);
 
       command_req_t Exec_event_1 = {
         uid_t {0,1},
@@ -447,8 +449,6 @@ public:
         {0}
       };
       command_req_t command_maced = eh.e_test_set_mac_command_req(Exec_event_1);
-
-      Assert::IsTrue(append_reqs.size() == 1);
 
       Assert::IsFalse(eh.e_test_is_executed(uid_t{ 0,1 }));
       Assert::IsTrue(eh.e_test_is_enabled(uid_t{ 0,1 }));
@@ -476,10 +476,159 @@ public:
       Assert::IsFalse(eh.e_test_is_enabled(uid_t{ 0,5 }));
       Assert::IsTrue(eh.e_test_is_pending(uid_t{ 0,4 }));
       Assert::IsTrue(eh.e_test_is_pending(uid_t{ 0,4 }));
+    }
+
+    TEST_METHOD(leader_lock_msg_exec_sequence_test) {
+      dcr_workflow wf = wf_DU_DE();
+      std::map<uid_t, uid_t, cmp_uids> peer_map = ten_peers_two_peer_per_event_peer_map();
+      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      std::vector<uid_t> quorum;
+      quorum.push_back({ 0,2 });
+      make_leader(&eh, { 0,1 }, quorum, 1);
+
+      Assert::IsTrue(append_reqs.size() == 1);
+
+      command_req_t Lock_event_1 = {
+        uid_t{ 0,1 },
+        uid_t{ 0,2 },
+        command_tag_t{ uid_t{ 0,1 }, LOCK },
+        uid_t{ 0,1 },
+        { 0 }
+      };
+      command_req_t command_maced = eh.e_test_set_mac_command_req(Lock_event_1);
+
+      eh.e_recv_command_req(command_maced);
+
+      Assert::IsTrue(append_reqs.size() == 2);
+      
+      //ack update, increment leaders commit index
+      append_rsp_t rsp = empty_append_rsp({ 0, 1 }, { 0, 2 });
+      rsp.term = append_reqs[1].term;
+      rsp.prev_term = append_reqs[1].prev_term;
+      rsp.prev_index = append_reqs[1].prev_index;
+      rsp.success = true;
+      rsp.last_index = 1;
+      rsp = eh.e_test_set_mac_append_rsp(rsp);
+      eh.e_recv_append_rsp(rsp);
+
+      // leader has sent lock requests to the necessary leaders
+      Assert::IsTrue(command_reqs.size() == 2);
+      Assert::IsTrue(uids_equal(command_reqs[0].target, { 0, 7 }));
+      Assert::IsTrue(uids_equal(command_reqs[1].target, { 0, 9 }));
+
+      command_rsp_t rsp1 = empty_command_rsp({ 0, 1 }, { 0, 7 });
+      command_rsp_t rsp2 = empty_command_rsp({ 0, 1 }, { 0, 9 });
+      rsp1.tag = command_reqs[0].tag;
+      rsp2.tag = command_reqs[1].tag;
+      rsp1.success = true;
+      rsp2.success = true;
+      rsp1.leader = { 0, 7 };
+      rsp2.leader = { 0, 9 };
+
+      rsp1 = eh.e_test_set_mac_command_rsp(rsp1);
+      rsp2 = eh.e_test_set_mac_command_rsp(rsp2);
+
+      eh.e_recv_command_rsp(rsp1);
+      Assert::IsTrue(command_reqs.size() == 2);
+      Assert::IsTrue(append_reqs.size() == 2);
+      eh.e_recv_command_rsp(rsp2);
+      Assert::IsTrue(command_reqs.size() == 5);
+      Assert::IsTrue(append_reqs.size() == 3);
+      Assert::IsFalse(eh.e_test_is_executed({ 0,1 }));
+
+      rsp = empty_append_rsp({ 0, 1 }, { 0, 2 });
+      rsp.term = append_reqs[2].term;
+      rsp.prev_term = append_reqs[2].prev_term;
+      rsp.prev_index = append_reqs[2].prev_index;
+      rsp.success = true;
+      rsp.last_index = 2;
+      rsp = eh.e_test_set_mac_append_rsp(rsp);
+      eh.e_recv_append_rsp(rsp);
+      Assert::IsTrue(eh.e_test_is_executed({ 0,1 }));
+    }
+
+    TEST_METHOD(double_enclave_handle_test) {
+      enclave_handle eh1;
+      enclave_handle eh2;
+      eh1.init_enclave();
+      eh2.init_enclave();
+      dcr_workflow wf1 = wf_DU_DE();
+      dcr_workflow wf2 = wf_DU_DE();
+      std::map<uid_t, uid_t, cmp_uids> peer_map1 = ten_peers_two_peer_per_event_peer_map();
+      std::map<uid_t, uid_t, cmp_uids> peer_map2 = ten_peers_two_peer_per_event_peer_map();
+      eh1.e_provision_enclave({ 0,1 }, wf1, peer_map1);
+      eh2.e_provision_enclave({ 0,1 }, wf2, peer_map1);
+      std::vector<uid_t> quorum;
+      quorum.push_back({ 0,2 });
+      make_leader(&eh1, { 0,1 }, quorum, 1);
+      make_leader(&eh2, { 0,1 }, quorum, 1);
+
+      command_req_t Exec_event_1 = {
+        uid_t{ 0,1 },
+        uid_t{ 0,2 },
+        command_tag_t{ uid_t{ 0,1 }, EXEC },
+        uid_t{ 0,1 },
+        { 0 }
+      };
+      command_req_t command_maced = eh1.e_test_set_mac_command_req(Exec_event_1);
+      eh1.e_recv_command_req(command_maced);
+      append_rsp_t rsp = empty_append_rsp({ 0,1 }, { 0,2 });
+      rsp.term = append_reqs[2].term;
+      rsp.prev_term = append_reqs[2].prev_term;
+      rsp.prev_index = append_reqs[2].prev_index;
+      rsp.success = true;
+      rsp.last_index = 1;
+      rsp = eh.e_test_set_mac_append_rsp(rsp);
+      eh1.e_recv_append_rsp(rsp);
+      Assert::IsTrue(eh1.e_test_is_executed(uid_t{ 0,1 }));
+      Assert::IsFalse(eh2.e_test_is_executed(uid_t{ 0,1 }));
+      eh1.destroy_enclave();
+      eh2.destroy_enclave();
+    }
+
+    TEST_METHOD(follower_exec_test) {
+      dcr_workflow wf = wf_DU_DE();
+      std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
+      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+
+      append_req_t req1 = empty_append_req({ 0,1 }, { 0,2 });
+      entry_t exec_entry = {
+        1,
+        1,
+        {0,1}, //event
+        {0,2}, //source
+        {{1,1}, EXEC}
+      };
+      req1.entries = &exec_entry;
+      req1.entries_n = 1;
+      req1.commit_index = 0;
+      req1.prev_index = 0;
+      req1.prev_term = 0;
+      req1.term = 1; //will make us ({0,2}) leader
+      req1 = eh.e_test_set_mac_append_req(req1);
+      eh.e_recv_append_req(req1);
+
+      //not yet committed, so the follower should not have applied the execution yet.
+      Assert::IsFalse(eh.e_test_is_executed({ 0,1 }));
+
+      // commit the previous message
+      req1 = empty_append_req({ 0,1 }, { 0,2 });
+      req1.commit_index = 1;
+      req1.prev_index = 1;
+      req1.prev_term = 1;
+      req1.term = 1;
+      req1.entries = { 0 };
+      req1.entries_n = 0;
+      req1 = eh.e_test_set_mac_append_req(req1);
+      eh.e_recv_append_req(req1);
+
+      Assert::IsTrue(eh.e_test_is_executed({ 0,1 }));
 
     }
   };
 }
+
+
 
 void request_time() {
 

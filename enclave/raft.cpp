@@ -38,7 +38,7 @@ void peer::update_term(uint32_t new_term, uid_t new_leader) {
 }
 
 bool peer::term_and_index_exist_in_log(uint32_t term, uint32_t index) {
-  if (log.size() >= index)
+  if (log.size() <= index)
     return false;
   entry_t entry_i = log[index];
   return entry_i.term == term;
@@ -93,8 +93,8 @@ bool peer::executing_own_event() {
 
 bool peer::locks_aquired() {
   std::set<uid_t, cmp_uids> lock_set = workflow.get_lock_set(cluster_event);
-  for each (uid_t lock in locked_events) {
-    if (lock_set.find(lock) == lock_set.end())
+  for each (uid_t lock in lock_set) {
+    if (locked_events.find(lock) == locked_events.end())
       return false;
   }
   return true;
@@ -119,11 +119,11 @@ bool peer::has_unresolved_lock(uint32_t& out_val) {
     if (entry.tag.type == LOCK) {
       if (!lock_is_resolved(i)) {
         out_val = i;
-        return false;
+        return true;
       }
     }
   }
-  return true;
+  return false;
 }
 
 bool peer::has_unresolved_lock() {

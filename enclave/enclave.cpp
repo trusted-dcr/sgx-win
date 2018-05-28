@@ -13,12 +13,15 @@ bool verify_mac_and_own_term(T* msg, U validate_mac) {
   if (!is_valid_message)
     return false; //invalid mac
 
+  //verify that we are the intended receiver
+  if (!uids_equal(msg->target, self.id))
+    return false;
+
   //verify term
   if (msg->term > self.term) {
     self.update_term(msg->term, msg->source);
     self.locked_entry_index = -1;
     self.role = FOLLOWER;
-    return false;
   }
 
   return true;
@@ -159,7 +162,7 @@ void append_to_log(entry_t entry) {
       self.last_entry().term,   /* prev_term */
       self.last_entry().index,  /* prev_index */
       self.get_commit_index(),  /* commit_index */
-      &entry,                   /* entries */
+      &self.last_entry(),                   /* entries */
       1,                        /* entries_n */
       { 0 }                     /* mac */
     };
@@ -434,6 +437,10 @@ void recv_command_req(command_req_t req) {
   if (!valid)
     return;
 
+  //verify that we are the intended receiver
+  if (!uids_equal(req.target, self.id))
+    return;
+
   if (self.role != LEADER) { //only leaders handle to command requests. Other roles redirect to leader.
     command_rsp_t rsp = {
       req.source,     /* target */
@@ -525,6 +532,10 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
   bool valid = false;
   validate_flat_msg<command_rsp_t>(&rsp, valid);
   if (!valid)
+    return;
+
+  //verify that we are the intended receiver
+  if (!uids_equal(rsp.target, self.id))
     return;
 
   // if we're not leader, the response is not for us, and our new leader will eventually resend request.
