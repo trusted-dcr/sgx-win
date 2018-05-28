@@ -18,4 +18,6 @@ bool tags_equal(const command_tag_t& lhs, const command_tag_t& rhs);
 
 bool entry_equal(const entry_t& lhs, const entry_t& rhs);
 
-uid_t generate_random_uid();
+uid_t generate_random_uid(); 
+
+entry_t get_empty_entry();

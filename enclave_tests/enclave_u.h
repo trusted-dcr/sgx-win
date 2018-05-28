@@ -34,7 +34,7 @@ sgx_status_t recv_poll_req(sgx_enclave_id_t eid, poll_req_t req);
 sgx_status_t recv_poll_rsp(sgx_enclave_id_t eid, poll_rsp_t rsp);
 sgx_status_t recv_election_req(sgx_enclave_id_t eid, election_req_t req);
 sgx_status_t recv_election_rsp(sgx_enclave_id_t eid, election_rsp_t rsp);
-sgx_status_t provision_enclave(sgx_enclave_id_t eid, uid_t self_id, uid_t self_cluster_event, uid_t wf_id, char* wf_name, uid_t* event_ids, uint32_t events_count, uid_t* excluded, uint32_t excluded_count, uid_t* pending, uint32_t pending_count, uid_t* executed, uint32_t executed_count, uid_t* dcr_conditions_out, uid_t* dcr_conditions_in, uint32_t conditions_count, uid_t* dcr_milestones_out, uid_t* dcr_milestones_in, uint32_t milestones_count, uid_t* dcr_includes_out, uid_t* dcr_includes_in, uint32_t includes_count, uid_t* dcr_excludes_out, uid_t* dcr_excludes_in, uint32_t excludes_count, uid_t* dcr_responses_out, uid_t* dcr_responses_in, uint32_t responses_count, uid_t* peer_map_peers, uid_t* peer_map_events, uint32_t peer_map_count);
+sgx_status_t provision_enclave(sgx_enclave_id_t eid, uid_t self_id, uid_t wf_id, char* wf_name, uid_t* event_ids, uint32_t events_count, uid_t* excluded, uint32_t excluded_count, uid_t* pending, uint32_t pending_count, uid_t* executed, uint32_t executed_count, uid_t* dcr_conditions_out, uid_t* dcr_conditions_in, uint32_t conditions_count, uid_t* dcr_milestones_out, uid_t* dcr_milestones_in, uint32_t milestones_count, uid_t* dcr_includes_out, uid_t* dcr_includes_in, uint32_t includes_count, uid_t* dcr_excludes_out, uid_t* dcr_excludes_in, uint32_t excludes_count, uid_t* dcr_responses_out, uid_t* dcr_responses_in, uint32_t responses_count, uid_t* peer_map_peers, uid_t* peer_map_events, uint32_t peer_map_count);
 sgx_status_t test_set_mac_command_req(sgx_enclave_id_t eid, command_req_t* retval, command_req_t req);
 sgx_status_t test_set_mac_command_rsp(sgx_enclave_id_t eid, command_rsp_t* retval, command_rsp_t rsp);
 sgx_status_t test_set_mac_append_req(sgx_enclave_id_t eid, append_req_t* retval, append_req_t req);
@@ -43,11 +43,15 @@ sgx_status_t test_set_mac_poll_req(sgx_enclave_id_t eid, poll_req_t* retval, pol
 sgx_status_t test_set_mac_poll_rsp(sgx_enclave_id_t eid, poll_rsp_t* retval, poll_rsp_t rsp);
 sgx_status_t test_set_mac_election_req(sgx_enclave_id_t eid, election_req_t* retval, election_req_t req);
 sgx_status_t test_set_mac_election_rsp(sgx_enclave_id_t eid, election_rsp_t* retval, election_rsp_t rsp);
+sgx_status_t test_verify_mac_poll_req(sgx_enclave_id_t eid, bool* retval, poll_req_t req);
 sgx_status_t test_execute(sgx_enclave_id_t eid, uid_t event_id);
 sgx_status_t test_is_enabled(sgx_enclave_id_t eid, bool* retval, uid_t event_id);
 sgx_status_t test_is_executed(sgx_enclave_id_t eid, bool* retval, uid_t event_id);
 sgx_status_t test_is_pending(sgx_enclave_id_t eid, bool* retval, uid_t event_id);
 sgx_status_t test_is_excluded(sgx_enclave_id_t eid, bool* retval, uid_t event_id);
+sgx_status_t test_leader_of_event(sgx_enclave_id_t eid, uid_t* retval, uid_t event_id);
+sgx_status_t test_event_of_peer(sgx_enclave_id_t eid, uid_t* retval, uid_t peer_id);
+sgx_status_t test_size_of_event_cluster(sgx_enclave_id_t eid, uint32_t* retval);
 
 #ifdef __cplusplus
 }

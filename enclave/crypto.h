@@ -15,7 +15,7 @@ sgx_status_t get_mac_list(T* list, uint32_t length, sgx_cmac_128bit_tag_t* tag) 
 
 template<typename T>
 sgx_status_t get_mac_flattened(T* msg, sgx_cmac_128bit_tag_t* tag) {
-  sgx_status_t ret = sgx_rijndael128_cmac_msg(&p_key, (uint8_t*)msg, sizeof(T) - SGX_CMAC_MAC_SIZE, tag);
+  sgx_status_t ret = sgx_rijndael128_cmac_msg(&p_key, (uint8_t*)msg, sizeof(T) - SGX_CMAC_MAC_SIZE-4, tag); //WHY 4????!?!?!?!
   return ret;
 }
 
@@ -34,6 +34,17 @@ sgx_status_t validate_flat_msg(T* msg, bool& valid) {
   valid = cmp_macs(msg->mac, tag);
   return ret;
 }
+
+
+//template<typename T>
+//sgx_status_t validate_flat_msg(T* msg, bool& valid) {
+//  sgx_cmac_128bit_tag_t tag;
+//  T msg_cpy = { 0 };
+//  memcpy(&msg_cpy, msg, sizeof(T) - SGX_CMAC_MAC_SIZE); // TODO -4 ?!?!?!?! WHYYYYYY
+//  sgx_status_t ret = get_mac_flattened<T>(&msg_cpy, &tag);
+//  valid = cmp_macs(msg->mac, tag);
+//  return ret;
+//}
 
 sgx_status_t set_mac_append_req(append_req_t* append_req);
 

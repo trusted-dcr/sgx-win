@@ -26,3 +26,14 @@ uid_t generate_random_uid() {
   } while (status != SGX_SUCCESS);
   return id;
 }
+
+entry_t get_empty_entry() {
+  entry_t entry = {
+    0, /* index */
+    0, /* term */
+    {0,0}, /* event */
+    {0,0}, /* source */
+    CHECKPOINT/* tag */
+  };
+  return entry;
+}

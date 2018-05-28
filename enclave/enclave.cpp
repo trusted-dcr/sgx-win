@@ -45,11 +45,13 @@ bool verify_msg_term(T msg, V mac, W send) {
 //sending helpers
 template<typename T, typename U, typename V>
 void mac_and_broadcast_msgs(std::vector<T> msgs, U mac, V send) {
-  for each (T msg in msgs) {
+  for (uint32_t i = 0; i < msgs.size(); i++) {
+    T msg = msgs[i];
     sgx_status_t status;
     do {
       status = mac(&msg);
     } while (status != SGX_SUCCESS);
+    msgs[i] = msg;
   }
   for each (T msg in msgs) {
     send(msg);
@@ -108,10 +110,9 @@ void update_timeout() {
 
   unsigned char* rand = new unsigned char[2];
   uint16_t r;
-  do {
-    sgx_read_rand(rand, 2);
-    r = (rand[1] << 8) + rand[0];
-  } while (r > delta_max_time);
+  sgx_read_rand(rand, 2);
+  r = (rand[1] << 8) + rand[0];
+  r = r % delta_max_time; //may skew randomness a bit
 
   self.t = self.t_min + r;
 }
@@ -820,7 +821,6 @@ void set_time(uint64_t ticks) {
 
 void provision_enclave(
   uid_t self_id,
-  uid_t self_cluster_event,
   uid_t wf_id,
   char* wf_name,
   uid_t* event_ids, uint32_t events_count,
@@ -861,13 +861,13 @@ void provision_enclave(
     responses_count/* responses_count */
   };
   self.id = self_id;
-  self.cluster_event = self_cluster_event;
+  self.log.push_back(get_empty_entry());
 
   //transform intermediate
   self.workflow = self.workflow.make_workflow(wf,wf_name);
   self.workflow.id = wf_id;
 
-  self.peer_to_event_map = create_peer_to_event_map(peer_map_peers, peer_map_events, peer_map_count);
+  self.peer_to_event_map = create_peer_to_event_map(peer_map_peers, peer_map_events, peer_map_count, self.id, &self.cluster_event);
   self.leader_map = pick_leaders(self.peer_to_event_map);
   self.last_checkpoint = 0;
   self.role = FOLLOWER;
@@ -960,4 +960,26 @@ election_rsp_t test_set_mac_election_rsp(election_rsp_t rsp) {
     throw - 100;
   return rsp;
 }
-#endif // SGX_DEBUF
+
+bool test_verify_mac_poll_req(poll_req_t req) {
+  sgx_status_t status;
+  bool ret;
+  status = validate_flat_msg<poll_req_t>(&req, ret);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return ret;
+}
+
+
+uid_t test_leader_of_event(uid_t event_id) {
+  return self.leader_map[event_id];
+}
+
+uid_t test_event_of_peer(uid_t peer_id) {
+  return self.peer_to_event_map[peer_id];
+}
+
+uint32_t test_size_of_event_cluster() {
+  return self.cluster_size;
+}
+#endif // SGX_DEBUG

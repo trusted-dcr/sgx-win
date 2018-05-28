@@ -2,9 +2,11 @@
 #include "dcr.h"
 #include "raft.h"
 
-std::map<uid_t, uid_t, cmp_uids> create_peer_to_event_map(uid_t* peers, uid_t* events, uint32_t map_size) {
+std::map<uid_t, uid_t, cmp_uids> create_peer_to_event_map(uid_t* peers, uid_t* events, uint32_t map_size, uid_t own_id, uid_t* cluster_event) {
   std::map<uid_t, uid_t, cmp_uids> peer_to_event_map;
   for (uint32_t i = 0; i < map_size; i++) {
+    if (uids_equal(peers[i], own_id))
+      *cluster_event = events[i];
     peer_to_event_map[peers[i]] = events[i];
   }
   return peer_to_event_map;

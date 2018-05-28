@@ -67,13 +67,15 @@ public:
       peers.push_back(pair.first);
       events.push_back(pair.second);
     }
-    if(peers.size() > 0)
-      peers_list = &peers[0];
-    if (events.size() > 0)
-      events_list = &events[0];
+    if (peers.size() > 0) {
+      std::copy(peers.begin(), peers.end(), peers_list);
+    }
+    if (events.size() > 0) {
+      std::copy(events.begin(), events.end(), events_list);
+    }
   }
 
-  sgx_status_t e_provision_enclave(uid_t peer_id, dcr_workflow workflow, uid_t cluster_event_id, std::map<uid_t, uid_t, cmp_uids> peer_to_event_map) {
+  sgx_status_t e_provision_enclave(uid_t peer_id, dcr_workflow workflow, std::map<uid_t, uid_t, cmp_uids> peer_to_event_map) {
     uid_t wf_id = workflow.id;
     intermediate_dcr_worflow temp = workflow.create_intermediate();
     uid_t* peer_map_peers = new uid_t[peer_to_event_map.size()];
@@ -83,7 +85,6 @@ public:
     sgx_status_t status = provision_enclave(
       eid,        
       peer_id,                /* self_id */
-      cluster_event_id,       /* self_cluster_event */
       wf_id,                  /* wf_id */
       (char*)workflow.name.c_str(),  /* wf_name */
       temp.event_ids, /* event_ids */
@@ -112,9 +113,14 @@ public:
       peer_map_peers,/* peer_map_peers */
       peer_map_events,/* peer_map_events */
       peer_to_event_map.size()/* peer_map_count */
-    );
+    );    
+    
+    delete peer_map_events;
+    delete peer_map_peers;
+
     if (status != SGX_SUCCESS)
       return status;
+
     return e_set_time();
   }
 
@@ -192,6 +198,30 @@ public:
   election_rsp_t e_test_set_mac_election_rsp(election_rsp_t rsp) {
     election_rsp_t ret;
     sgx_status_t status = test_set_mac_election_rsp(eid, &ret, rsp);
+    return ret;
+  }
+
+  bool e_test_verify_mac_poll_req(poll_req_t req) {
+    bool ret;
+    sgx_status_t status = test_verify_mac_poll_req(eid, &ret, req);
+    return ret;
+  }
+
+  uid_t e_test_leader_of_event(uid_t event_id) {
+    uid_t ret;
+    sgx_status_t status = test_leader_of_event(eid, &ret, event_id);
+    return ret;
+  }
+
+  uid_t e_test_event_of_peer(uid_t peer_id) {
+    uid_t ret;
+    sgx_status_t status = test_event_of_peer(eid, &ret, peer_id);
+    return ret;
+  }
+
+  uint32_t e_test_size_of_event_cluster() {
+    uint32_t ret;
+    sgx_status_t status = test_size_of_event_cluster(eid, &ret);
     return ret;
   }
 #endif

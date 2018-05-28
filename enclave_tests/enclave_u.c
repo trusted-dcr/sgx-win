@@ -39,7 +39,6 @@ typedef struct ms_recv_election_rsp_t {
 
 typedef struct ms_provision_enclave_t {
 	uid_t ms_self_id;
-	uid_t ms_self_cluster_event;
 	uid_t ms_wf_id;
 	char* ms_wf_name;
 	size_t ms_wf_name_len;
@@ -111,6 +110,11 @@ typedef struct ms_test_set_mac_election_rsp_t {
 	election_rsp_t ms_rsp;
 } ms_test_set_mac_election_rsp_t;
 
+typedef struct ms_test_verify_mac_poll_req_t {
+	bool ms_retval;
+	poll_req_t ms_req;
+} ms_test_verify_mac_poll_req_t;
+
 typedef struct ms_test_execute_t {
 	uid_t ms_event_id;
 } ms_test_execute_t;
@@ -134,6 +138,20 @@ typedef struct ms_test_is_excluded_t {
 	bool ms_retval;
 	uid_t ms_event_id;
 } ms_test_is_excluded_t;
+
+typedef struct ms_test_leader_of_event_t {
+	uid_t ms_retval;
+	uid_t ms_event_id;
+} ms_test_leader_of_event_t;
+
+typedef struct ms_test_event_of_peer_t {
+	uid_t ms_retval;
+	uid_t ms_peer_id;
+} ms_test_event_of_peer_t;
+
+typedef struct ms_test_size_of_event_cluster_t {
+	uint32_t ms_retval;
+} ms_test_size_of_event_cluster_t;
 
 typedef struct ms_send_command_req_t {
 	command_req_t ms_req;
@@ -339,12 +357,11 @@ sgx_status_t recv_election_rsp(sgx_enclave_id_t eid, election_rsp_t rsp)
 	return status;
 }
 
-sgx_status_t provision_enclave(sgx_enclave_id_t eid, uid_t self_id, uid_t self_cluster_event, uid_t wf_id, char* wf_name, uid_t* event_ids, uint32_t events_count, uid_t* excluded, uint32_t excluded_count, uid_t* pending, uint32_t pending_count, uid_t* executed, uint32_t executed_count, uid_t* dcr_conditions_out, uid_t* dcr_conditions_in, uint32_t conditions_count, uid_t* dcr_milestones_out, uid_t* dcr_milestones_in, uint32_t milestones_count, uid_t* dcr_includes_out, uid_t* dcr_includes_in, uint32_t includes_count, uid_t* dcr_excludes_out, uid_t* dcr_excludes_in, uint32_t excludes_count, uid_t* dcr_responses_out, uid_t* dcr_responses_in, uint32_t responses_count, uid_t* peer_map_peers, uid_t* peer_map_events, uint32_t peer_map_count)
+sgx_status_t provision_enclave(sgx_enclave_id_t eid, uid_t self_id, uid_t wf_id, char* wf_name, uid_t* event_ids, uint32_t events_count, uid_t* excluded, uint32_t excluded_count, uid_t* pending, uint32_t pending_count, uid_t* executed, uint32_t executed_count, uid_t* dcr_conditions_out, uid_t* dcr_conditions_in, uint32_t conditions_count, uid_t* dcr_milestones_out, uid_t* dcr_milestones_in, uint32_t milestones_count, uid_t* dcr_includes_out, uid_t* dcr_includes_in, uint32_t includes_count, uid_t* dcr_excludes_out, uid_t* dcr_excludes_in, uint32_t excludes_count, uid_t* dcr_responses_out, uid_t* dcr_responses_in, uint32_t responses_count, uid_t* peer_map_peers, uid_t* peer_map_events, uint32_t peer_map_count)
 {
 	sgx_status_t status;
 	ms_provision_enclave_t ms;
 	ms.ms_self_id = self_id;
-	ms.ms_self_cluster_event = self_cluster_event;
 	ms.ms_wf_id = wf_id;
 	ms.ms_wf_name = (char*)wf_name;
 	ms.ms_wf_name_len = wf_name ? strlen(wf_name) + 1 : 0;
@@ -458,12 +475,22 @@ sgx_status_t test_set_mac_election_rsp(sgx_enclave_id_t eid, election_rsp_t* ret
 	return status;
 }
 
+sgx_status_t test_verify_mac_poll_req(sgx_enclave_id_t eid, bool* retval, poll_req_t req)
+{
+	sgx_status_t status;
+	ms_test_verify_mac_poll_req_t ms;
+	ms.ms_req = req;
+	status = sgx_ecall(eid, 18, &ocall_table_enclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
 sgx_status_t test_execute(sgx_enclave_id_t eid, uid_t event_id)
 {
 	sgx_status_t status;
 	ms_test_execute_t ms;
 	ms.ms_event_id = event_id;
-	status = sgx_ecall(eid, 18, &ocall_table_enclave, &ms);
+	status = sgx_ecall(eid, 19, &ocall_table_enclave, &ms);
 	return status;
 }
 
@@ -472,7 +499,7 @@ sgx_status_t test_is_enabled(sgx_enclave_id_t eid, bool* retval, uid_t event_id)
 	sgx_status_t status;
 	ms_test_is_enabled_t ms;
 	ms.ms_event_id = event_id;
-	status = sgx_ecall(eid, 19, &ocall_table_enclave, &ms);
+	status = sgx_ecall(eid, 20, &ocall_table_enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -482,7 +509,7 @@ sgx_status_t test_is_executed(sgx_enclave_id_t eid, bool* retval, uid_t event_id
 	sgx_status_t status;
 	ms_test_is_executed_t ms;
 	ms.ms_event_id = event_id;
-	status = sgx_ecall(eid, 20, &ocall_table_enclave, &ms);
+	status = sgx_ecall(eid, 21, &ocall_table_enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -492,7 +519,7 @@ sgx_status_t test_is_pending(sgx_enclave_id_t eid, bool* retval, uid_t event_id)
 	sgx_status_t status;
 	ms_test_is_pending_t ms;
 	ms.ms_event_id = event_id;
-	status = sgx_ecall(eid, 21, &ocall_table_enclave, &ms);
+	status = sgx_ecall(eid, 22, &ocall_table_enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -502,7 +529,36 @@ sgx_status_t test_is_excluded(sgx_enclave_id_t eid, bool* retval, uid_t event_id
 	sgx_status_t status;
 	ms_test_is_excluded_t ms;
 	ms.ms_event_id = event_id;
-	status = sgx_ecall(eid, 22, &ocall_table_enclave, &ms);
+	status = sgx_ecall(eid, 23, &ocall_table_enclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t test_leader_of_event(sgx_enclave_id_t eid, uid_t* retval, uid_t event_id)
+{
+	sgx_status_t status;
+	ms_test_leader_of_event_t ms;
+	ms.ms_event_id = event_id;
+	status = sgx_ecall(eid, 24, &ocall_table_enclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t test_event_of_peer(sgx_enclave_id_t eid, uid_t* retval, uid_t peer_id)
+{
+	sgx_status_t status;
+	ms_test_event_of_peer_t ms;
+	ms.ms_peer_id = peer_id;
+	status = sgx_ecall(eid, 25, &ocall_table_enclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t test_size_of_event_cluster(sgx_enclave_id_t eid, uint32_t* retval)
+{
+	sgx_status_t status;
+	ms_test_size_of_event_cluster_t ms;
+	status = sgx_ecall(eid, 26, &ocall_table_enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }

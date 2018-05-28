@@ -19,7 +19,6 @@ enclave {
 
 		public void provision_enclave(
 		 uid_t self_id,
-		 uid_t self_cluster_event,
 		 uid_t wf_id,
 		 [in, string] char* wf_name,
 		 [in, count=events_count] uid_t* event_ids, uint32_t events_count,
@@ -46,11 +45,19 @@ enclave {
         public election_req_t test_set_mac_election_req(election_req_t req);
         public election_rsp_t test_set_mac_election_rsp(election_rsp_t rsp);
 
+        public bool test_verify_mac_poll_req(poll_req_t req);
+
+
 		public void test_execute(uid_t event_id);
 		public bool test_is_enabled(uid_t event_id);
 		public bool test_is_executed(uid_t event_id);
 		public bool test_is_pending(uid_t event_id);
 		public bool test_is_excluded(uid_t event_id);
+
+		public uid_t test_leader_of_event(uid_t event_id);
+		public uid_t test_event_of_peer(uid_t peer_id);
+		public uint32_t test_size_of_event_cluster();
+
 #endif
 	};
     untrusted {
