@@ -92,18 +92,6 @@ void mac_and_send_append_req(append_req_t msg) {
   send_append_req(msg,msg.entries,msg.entries_n);
 }
 
-void becomme_leader() {
-  self.last_checkpoint = self.find_latest_checkpoint();
-  uint32_t index;
-  if (self.has_unresolved_lock(index)) {
-    self.locked_entry_index = index;
-  }
-  else {
-    self.locked_entry_index = -1;
-  }
-  self.role = LEADER;
-}
-
 void update_timeout() {
   if (self.role == LEADER) {
     self.t = self.now + delta_heartbeat;
