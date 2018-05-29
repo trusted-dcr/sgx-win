@@ -673,20 +673,37 @@ public:
       Assert::IsTrue(uids_equal(command_reqs[2].target, { 0,3 })); //test retry
       Assert::IsTrue(append_reqs.size() == 3);
     }
-  };
-  TEST_CLASS(simulation) {
-public:
-    enclave_handle eh;
 
-    TEST_METHOD_INITIALIZE(setup) {
-      eh.init_enclave();
-    }
+    TEST_METHOD(missing_resp_test) {
+      leader_lock_msg_exec_sequence_test(); //leaves us in state with one missing response
+      command_reqs.clear();
+      append_reqs.clear();
 
-    TEST_METHOD_CLEANUP(teardown) {
-      eh.destroy_enclave();
-      simulate = false;
+      Assert::IsTrue(command_reqs.size() == 0);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
+      eh.e_set_time();
+
+      Assert::IsTrue(command_reqs.size() == 1);
+      Assert::IsTrue(uids_equal(command_reqs[0].target, { 0,3 }));
+      Assert::IsTrue(append_reqs.size() == 1);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
+      eh.e_set_time();
+
+      Assert::IsTrue(command_reqs.size() == 2);
+      Assert::IsTrue(uids_equal(command_reqs[1].target, { 0,4 })); //test retry
+      Assert::IsTrue(append_reqs.size() == 2);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(600)); //delta_heartbeat = 500
+      eh.e_set_time();
+
+      Assert::IsTrue(command_reqs.size() == 3);
+      Assert::IsTrue(uids_equal(command_reqs[2].target, { 0,3 })); //test retry
+      Assert::IsTrue(append_reqs.size() == 3);
     }
   };
+  
 }
 
 
