@@ -6,6 +6,8 @@ sgx_daemon/protos/*
 enclave/enclave_t.h
 enclave/enclave_t.c
 
+enclave_tests/enclave_u.h
+enclave_tests/enclave_u.c
 sgx_daemon/enclave_u.h
 sgx_daemon/enclave_u.c
 
