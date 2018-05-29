@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <CppUnitTest.h>
+
 #include "protos\crypto.pb.cc"
 #include "protos\dcr.pb.cc"
 #include "protos\network.pb.cc"

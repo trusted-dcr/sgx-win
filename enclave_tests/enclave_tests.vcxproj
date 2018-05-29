@@ -34,6 +34,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup>
+    <VcpkgConfiguration Condition="'$(Configuration)' == 'Simulation'">Debug</VcpkgConfiguration>
+  </PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6847AEF6-95CF-4E6A-BD4E-F578B61870F4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -206,7 +209,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;$(VCInstallDir)UnitTest\include;..\enclave;..\sgx_daemon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;SGX_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link>
@@ -333,10 +336,10 @@
     <ProjectReference Include="..\enclave\enclave.vcxproj">
       <Project>{77688ad6-526a-4054-8496-d198cb554543}</Project>
     </ProjectReference>
+    <ClCompile Include="test_objects.cpp" />
     <ProjectReference Include="..\sgx_daemon\sgx_daemon.vcxproj">
       <Project>{81a7ca81-bf0a-4132-a726-05a20bcd4cbc}</Project>
     </ProjectReference>
-    <ClCompile Include="test_objects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\enclave\enclave.edl">

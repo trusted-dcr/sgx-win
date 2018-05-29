@@ -7,6 +7,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+#ifdef SGX_DEBUG
 bool uids_equal(const uid_t& lhs, const uid_t& rhs) {
   return (lhs.id1 == rhs.id1) && (lhs.id2 == rhs.id2);
 }
@@ -43,7 +44,7 @@ void make_leader(enclave_handle* eh, uid_t target, std::vector<uid_t> quorum, ui
 }
 
 namespace enclave_tests
-{		
+{
 	TEST_CLASS(enclave_dcr_tests)	{
 	public:
     enclave_handle eh;
@@ -55,7 +56,7 @@ namespace enclave_tests
     TEST_METHOD_CLEANUP(teardown) {
       eh.destroy_enclave();
     }
-		
+
 		TEST_METHOD(simple_condition_wf)
 		{
       dcr_workflow wf = wf_simple_condition();
@@ -502,7 +503,7 @@ public:
       eh.e_recv_command_req(command_maced);
 
       Assert::IsTrue(append_reqs.size() == 2);
-      
+
       //ack update, increment leaders commit index
       append_rsp_t rsp = empty_append_rsp({ 0, 1 }, { 0, 2 });
       rsp.term = append_reqs[1].term;
@@ -648,7 +649,7 @@ public:
       leader_lock_msg_exec_sequence_test(); //leaves us in state with one missing response
       command_reqs.clear();
       append_reqs.clear();
-      
+
       Assert::IsTrue(command_reqs.size() == 0);
 
       std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
@@ -731,3 +732,13 @@ void send_election_req(election_req_t req) {
 void send_election_rsp(election_rsp_t rsp) {
   election_rsps.push_back(rsp);
 }
+
+void send_log_req(log_req_t req) {
+	// TODO
+}
+
+void send_log_rsp(log_rsp_t rsp) {
+	// TODO
+}
+
+#endif // SGX_DEBUG
