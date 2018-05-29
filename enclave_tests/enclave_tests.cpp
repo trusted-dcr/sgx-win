@@ -655,22 +655,22 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
       eh.e_set_time();
 
-      Assert::IsTrue(command_reqs.size() == 1);
+      Assert::IsTrue(command_reqs.size() == 3);
       Assert::IsTrue(uids_equal(command_reqs[0].target, { 0,3 }));
       Assert::IsTrue(append_reqs.size() == 1);
 
       std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
       eh.e_set_time();
 
-      Assert::IsTrue(command_reqs.size() == 2);
-      Assert::IsTrue(uids_equal(command_reqs[1].target, { 0,4 })); //test retry
+      Assert::IsTrue(command_reqs.size() == 6);
+      Assert::IsTrue(uids_equal(command_reqs[3].target, { 0,4 })); //test retry
       Assert::IsTrue(append_reqs.size() == 2);
 
       std::this_thread::sleep_for(std::chrono::milliseconds(600)); //delta_heartbeat = 500
       eh.e_set_time();
 
-      Assert::IsTrue(command_reqs.size() == 3);
-      Assert::IsTrue(uids_equal(command_reqs[2].target, { 0,3 })); //test retry
+      Assert::IsTrue(command_reqs.size() == 9);
+      Assert::IsTrue(uids_equal(command_reqs[6].target, { 0,3 })); //test retry
       Assert::IsTrue(append_reqs.size() == 3);
     }
   };

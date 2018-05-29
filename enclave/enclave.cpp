@@ -195,46 +195,19 @@ void retry_requests() {
     self.retried_responses = false;
   }
 
-  if (self.locked_entry_index >= 0) { //resend lock, if unlock was missed
-    entry_t lock = self.log[self.locked_entry_index];
-    uid_t lock_source = lock.source;
-    if (self.leader_map.find(self.peer_to_event_map[lock.source]) != self.leader_map.end())
-      lock_source = self.leader_map[self.peer_to_event_map[lock.source]];
-    if (self.retried_unlock) {
-      lock_source = self.find_other_peer_in_cluster(lock_source);
-      self.retried_unlock = false;
-    }
-    else {
-      self.retried_unlock = true;
-    }
-
-    command_rsp_t rsp = {
-      lock_source, /* target */
-      self.id, /* source */
-      lock.tag, /* tag */
-      true, /* success */
-      self.id, /* leader */
-      { 0 }/* mac */
+  if (self.missing_resp.size() == 0 && self.last_checkpoint < self.get_commit_index()) { //not locked, no missing responses, and updated since last checkpoint
+    entry_t checkpoint = {
+      self.log.size(),  /* index */
+      self.term,        /* term */
+      self.cluster_event,        /* event */
+      self.id,       /* source */
+      {
+        generate_random_uid(),
+        CHECKPOINT
+      }       /* tag */
     };
-    mac_and_send_msg<command_rsp_t>(rsp, set_mac_flat_msg<command_rsp_t>, send_command_rsp);
-    self.retried_unlock = true;
-  }
-  else {
-    self.retried_unlock = false;
-    if (self.missing_resp.size() == 0 && self.last_checkpoint < self.get_commit_index()) { //not locked, no missing responses, and updated since last checkpoint
-      entry_t checkpoint = {
-        self.log.size(),  /* index */
-        self.term,        /* term */
-        self.cluster_event,        /* event */
-        self.id,       /* source */
-        {
-          generate_random_uid(),
-          CHECKPOINT
-        }       /* tag */
-      };
-      append_to_log(checkpoint);
-      self.last_checkpoint = checkpoint.index;
-    }
+    append_to_log(checkpoint);
+    self.last_checkpoint = checkpoint.index;
   }
 }
 
@@ -266,7 +239,8 @@ void send_lock_requests(uid_t tag_id) {
       { 0 }               /* mac */
     };
     lock_reqs.push_back(req);
-  }
+		self.missing_resp[req.target] = req;
+	}
   mac_and_broadcast_msgs<command_req_t>(lock_reqs, set_mac_flat_msg<command_req_t>, send_command_req);
 }
 
@@ -299,33 +273,35 @@ void send_execution(uid_t tag_id) {
       self.cluster_event, /* event */
       { 0 }               /* mac */
     };
-    exec_reqs.push_back(req);
-    if (lock_set.find(event_id) == lock_set.end()) {
-      self.missing_resp[req.target] = req;
-    }
+		exec_reqs.push_back(req);
+		self.missing_resp[req.target] = req;
   }
   mac_and_broadcast_msgs<command_req_t>(exec_reqs, set_mac_flat_msg<command_req_t>, send_command_req);
 }
 
-
 void abort_execution(uid_t tag_id) {
+	// reset own state
+	self.locked_events.clear();
+	self.locked_entry_index = -1;
+
+	// abort locally
+	append_to_log(entry_t {
+		(uint32_t)self.log.size(),    /* index */
+		self.term,          /* term */
+		self.cluster_event, /* event */
+		self.id,            /* source */
+		{
+			tag_id,
+			ABORT
+		}                   /* tag */
+	});
+
   std::vector<command_req_t> abort_reqs;
   std::set<uid_t, cmp_uids> lock_set = self.workflow.get_lock_set(self.cluster_event);
   for each (uid_t event_id in lock_set) {
     command_req_t req;
     uid_t event_leader;
-    try {
-      event_leader = self.leader_map.at(event_id);
-
-    }
-    catch (const std::exception&) { // no leader for the intended cluster
-      for each (std::pair<uid_t,uid_t> event_peer in self.peer_to_event_map) {
-        if (uids_equal(event_peer.second, event_id)) {
-          self.leader_map[event_id] = event_peer.first;
-          event_leader = event_peer.first;
-        }
-      }
-    }
+    event_leader = self.leader_map[event_id];
     req = {
       event_leader,       /* target */
       self.id,            /* source */
@@ -336,8 +312,13 @@ void abort_execution(uid_t tag_id) {
       self.cluster_event, /* event */
       { 0 }               /* mac */
     };
-    abort_reqs.push_back(req);
-  }
+
+		if (self.missing_resp.find(event_id) == self.missing_resp.end()) { //otherwise we must wait for the lock response
+			abort_reqs.push_back(req);
+			self.missing_resp[event_leader] = req;
+		}
+
+	}
   mac_and_broadcast_msgs<command_req_t>(abort_reqs, set_mac_flat_msg<command_req_t>, send_command_req);
 }
 
@@ -368,20 +349,10 @@ void update_commit_index(uint32_t new_index) {
       self.workflow.set_event_executed(entry.event);
     }
 
-    if (uids_equal(entry.event, self.cluster_event)) { // we own the event
-      switch (entry.tag.type) {
-      case LOCK:
+		// we own the event
+    if (uids_equal(entry.event, self.cluster_event) && entry.tag.type == LOCK) {
         send_lock_requests(entry.tag.uid);
         continue;
-      case EXEC:
-        continue; //do nothing -- executions have already been sent
-      case ABORT:
-        std::set<uid_t, cmp_uids> new_set;
-        self.locked_events = new_set;
-        self.locked_entry_index = -1;
-        abort_execution(entry.tag.uid);
-        continue;
-      }
     }
 
     //we do not own the event
@@ -393,7 +364,7 @@ void update_commit_index(uint32_t new_index) {
         self.id, /* source */
         entry.tag, /* tag */
         true, /* success */
-        self.id, /* leader */
+        empty_uid, /* leader */
         { 0 }/* mac */
       };
       break;
@@ -403,7 +374,7 @@ void update_commit_index(uint32_t new_index) {
         self.id, /* source */
         entry.tag, /* tag */
         true, /* success */
-        self.id, /* leader */
+        empty_uid, /* leader */
         { 0 }/* mac */
       };
       break;
@@ -495,7 +466,7 @@ void recv_command_req(command_req_t req) {
         self.id,      /* source */
         req.tag,      /* tag */
         true,         /* success */
-        self.leader,  /* leader */
+        self.id,  /* leader */
         {0}           /* mac */
       };
       mac_and_send_msg<command_rsp_t>(rsp, set_mac_flat_msg<command_rsp_t>, send_command_rsp);
@@ -513,10 +484,10 @@ void recv_command_req(command_req_t req) {
         self.id,      /* source */
         {
           req.tag.uid, /*tag uid*/
-          ABORT        /*tag type*/
+          LOCK        /*tag type*/
         },            /* tag */
-        true,         /* success */ // check for same lock as already performed
-        self.leader,  /* leader */
+        false,         /* success */
+        empty_uid,  /* leader */
         //req.event,    /* event*/
         { 0 }         /* mac */
       };
@@ -531,10 +502,10 @@ void recv_command_req(command_req_t req) {
           self.id,      /* source */
           {
             req.tag.uid, /*tag uid*/
-            ABORT       /*tag type*/
+            LOCK       /*tag type*/
           },            /* tag */
-          true,         /* success */ // check for same lock as already performed
-          self.leader,  /* leader */
+          false,         /* success */ // check for same lock as already performed
+          empty_uid,  /* leader */
           //req.event,    /* event */
           { 0 }         /* mac */
         };
@@ -574,35 +545,43 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
     return;
   }
 
-  //if !success, resend to that cluster leader
-  if (!rsp.success) { //replace leader in missing_resp and leader_map
+  //sucess = false and non-empty leader means source peer is not the cluster leader
+  if (!rsp.success && !uids_equal(rsp.leader, empty_uid)) {
     uid_t new_leader = rsp.leader;
-    if (rsp.tag.type == EXEC && self.missing_resp.find(rsp.source) != self.missing_resp.end()) { // EXEC should be in missing_resp - change it to the new leader
+    self.leader_map[self.peer_to_event_map[rsp.source]] = new_leader;
+		//if we are missing rsp from old leader, it is now missing from new leader
+		//retry_requests() will ensure resend
+    if (self.missing_resp.find(rsp.source) != self.missing_resp.end()) {
       command_req_t req = self.missing_resp[rsp.source];
       self.missing_resp.erase(rsp.source);
       self.missing_resp[new_leader] = req;
     }
-    self.leader_map[self.peer_to_event_map[rsp.source]] = new_leader;
     return;
   }
 
-  //we're leader, and our request was successful
+	//if this is rsp to missing_resp for peer, clear it
+	if (self.missing_resp.find(rsp.source) != self.missing_resp.end()) {
+		if (tags_equal(self.missing_resp[rsp.source].tag, rsp.tag))
+			self.missing_resp.erase(rsp.source);
+	}
+
+  //rsp is from cluster leader
   entry_t entry;
   switch (rsp.tag.type) {
-  case ABORT: // can only happen if we're executing and a lock was rejected
-    if (!self.executing_own_event()) // spurious extra safety check
+  case ABORT:
+		uid_t rsp_event = self.leader_map[rsp.source];
+		if (!uids_equal(self.log[self.locked_entry_index].event, rsp_event))
+			return; // unsolicited
+
+		if (self.executing_own_event()) {
+			abort_execution(entry.tag.uid);
+		}
+		// another cluster has a lock on us
+		else if (self.locked_entry_index == -1) {
+			// responsible cluster is aborting the execution attempt
+			append_to_log(entry);
       return;
-    entry = {
-      (uint32_t)self.log.size(),    /* index */
-      self.term,          /* term */
-      self.cluster_event, /* event */
-      self.id,            /* source */
-      {
-        generate_random_uid(),
-        ABORT
-      }                   /* tag */
-    };
-    append_to_log(entry);
+		}
     break;
   case EXEC:
     if(self.missing_resp.find(rsp.source) != self.missing_resp.end())
@@ -622,6 +601,7 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
           resolve_entry.event,/* event */
           { 0 }               /* mac */
           };
+				self.missing_resp[rsp.source] = req;
         mac_and_send_msg<command_req_t>(req, set_mac_flat_msg<command_req_t>, send_command_req);
       }
       return; // lock is resolved, and we have send respose if committed
@@ -841,6 +821,14 @@ void recv_election_rsp(election_rsp_t rsp) {
 void recv_log_req(log_req_t req) {}
 void recv_log_rsp(log_rsp_t rsp) {}
 
+void execute(uid_t event) {
+
+}
+
+void get_log() {
+
+}
+
 void timeout() {
   if (self.role == LEADER) {
     heartbeat();
@@ -906,7 +894,6 @@ void configure_enclave(
   };
   self.id = self_id;
   self.log.push_back(get_empty_entry());
-  self.retried_unlock = false;
   self.retried_responses = false;
 
   //transform intermediate

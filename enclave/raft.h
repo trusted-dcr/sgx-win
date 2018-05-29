@@ -51,7 +51,6 @@ public:
   uint64_t t;
   uint64_t now;
   bool retried_responses;
-  bool retried_unlock;
   //sgx_thread_mutex_t* time_lock;
 
   //lock
