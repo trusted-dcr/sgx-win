@@ -20,7 +20,7 @@ enclave {
         public void recv_log_req(log_req_t req);
         public void recv_log_rsp(log_rsp_t rsp);
 
-		public void provision_enclave(
+		public void configure_enclave(
 		 uid_t self_id,
 		 [in, count=events_count] uid_t* event_ids, uint32_t events_count,
 		 [in, count=excluded_count] uid_t* excluded, uint32_t excluded_count,

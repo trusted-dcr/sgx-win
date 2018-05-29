@@ -61,7 +61,7 @@ namespace enclave_tests
 		{
       dcr_workflow wf = wf_simple_condition();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       Assert::IsTrue(eh.e_test_is_enabled(uid_t{ 0,1 }));
       Assert::IsFalse(eh.e_test_is_enabled(uid_t{ 0,2 }));
@@ -70,7 +70,7 @@ namespace enclave_tests
     TEST_METHOD(simple_condition_wf_exec) {
       dcr_workflow wf = wf_simple_condition();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       eh.e_test_execute({ 0,1 });
 
@@ -81,7 +81,7 @@ namespace enclave_tests
     TEST_METHOD(simple_milestone_wf) {
       dcr_workflow wf = wf_simple_milestone();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       Assert::IsTrue(eh.e_test_is_enabled(uid_t{ 0,1 }));
       Assert::IsFalse(eh.e_test_is_enabled(uid_t{ 0,2 }));
@@ -90,7 +90,7 @@ namespace enclave_tests
     TEST_METHOD(simple_milestone_wf_exec) {
       dcr_workflow wf = wf_simple_milestone();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       eh.e_test_execute({ 0,1 });
 
@@ -101,7 +101,7 @@ namespace enclave_tests
     TEST_METHOD(simple_include_wf) {
       dcr_workflow wf = wf_simple_include();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       Assert::IsTrue(eh.e_test_is_enabled(uid_t{ 0,1 }));
       Assert::IsFalse(eh.e_test_is_enabled(uid_t{ 0,2 }));
@@ -111,7 +111,7 @@ namespace enclave_tests
     TEST_METHOD(simple_include_wf_exec) {
       dcr_workflow wf = wf_simple_include();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       eh.e_test_execute({ 0,1 });
 
@@ -123,7 +123,7 @@ namespace enclave_tests
     TEST_METHOD(simple_exclude_wf) {
       dcr_workflow wf = wf_simple_exclude();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       Assert::IsTrue(eh.e_test_is_enabled(uid_t{ 0,1 }));
       Assert::IsFalse(eh.e_test_is_excluded(uid_t{ 0,2 }));
@@ -132,7 +132,7 @@ namespace enclave_tests
     TEST_METHOD(simple_exclude_wf_exec) {
       dcr_workflow wf = wf_simple_exclude();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       eh.e_test_execute({ 0,1 });
 
@@ -143,7 +143,7 @@ namespace enclave_tests
     TEST_METHOD(simple_response_wf) {
       dcr_workflow wf = wf_simple_response();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       Assert::IsTrue(eh.e_test_is_enabled(uid_t{ 0,1 }));
       Assert::IsFalse(eh.e_test_is_pending(uid_t{ 0,2 }));
@@ -152,7 +152,7 @@ namespace enclave_tests
     TEST_METHOD(simple_response_wf_exec) {
       dcr_workflow wf = wf_simple_response();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       eh.e_test_execute({ 0,1 });
 
@@ -164,7 +164,7 @@ namespace enclave_tests
     TEST_METHOD(DU_DE_wf_full_exec) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map;
-      eh.e_provision_enclave({ 0 }, wf, peer_map);
+      eh.e_configure_enclave({ 0 }, wf, peer_map);
 
       Assert::IsTrue(eh.e_test_is_enabled(uid_t{ 0,1 }));
       Assert::IsFalse(eh.e_test_is_enabled(uid_t{ 0,2 }));
@@ -276,7 +276,7 @@ public:
     TEST_METHOD(simple_peer_map_init) {
       dcr_workflow wf = wf_simple_condition();
       std::map<uid_t, uid_t, cmp_uids> peer_map = one_peer_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
       uid_t leader = eh.e_test_leader_of_event({ 0,1 });
       uid_t event = eh.e_test_event_of_peer({ 0,1 });
@@ -289,7 +289,7 @@ public:
     TEST_METHOD(two_peer_map_init) {
       dcr_workflow wf = wf_simple_condition();
       std::map<uid_t, uid_t, cmp_uids> peer_map = one_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
       uid_t leader = eh.e_test_leader_of_event({ 0,1 });
       uid_t event = eh.e_test_event_of_peer({ 0,1 });
@@ -302,7 +302,7 @@ public:
     TEST_METHOD(six_peer_map_init) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
       uid_t leader1 = eh.e_test_leader_of_event({ 0,1 });
       uid_t leader2 = eh.e_test_leader_of_event({ 0,2 });
@@ -398,7 +398,7 @@ public:
     TEST_METHOD(init_poll_test) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
       Assert::AreEqual(1, (int)poll_reqs.size());
       poll_req_t req = poll_reqs[0];
@@ -409,7 +409,7 @@ public:
     TEST_METHOD(follower_successfull_poll_response) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
       Assert::AreEqual(1, (int)poll_reqs.size());
       poll_req_t req = poll_reqs[0];
@@ -437,7 +437,7 @@ public:
     TEST_METHOD(leader_exec_is_executing_test) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
       std::vector<uid_t> quorum;
       quorum.push_back({ 0,2 });
       make_leader(&eh, { 0,1 }, quorum, 1);
@@ -484,7 +484,7 @@ public:
     TEST_METHOD(leader_lock_msg_exec_sequence_test) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = ten_peers_two_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
       std::vector<uid_t> quorum;
       quorum.push_back({ 0,2 });
       make_leader(&eh, { 0,1 }, quorum, 1);
@@ -559,8 +559,8 @@ public:
       dcr_workflow wf2 = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map1 = ten_peers_two_peer_per_event_peer_map();
       std::map<uid_t, uid_t, cmp_uids> peer_map2 = ten_peers_two_peer_per_event_peer_map();
-      eh1.e_provision_enclave({ 0,1 }, wf1, peer_map1);
-      eh2.e_provision_enclave({ 0,1 }, wf2, peer_map1);
+      eh1.e_configure_enclave({ 0,1 }, wf1, peer_map1);
+      eh2.e_configure_enclave({ 0,1 }, wf2, peer_map1);
       std::vector<uid_t> quorum;
       quorum.push_back({ 0,2 });
       make_leader(&eh1, { 0,1 }, quorum, 1);
@@ -592,7 +592,7 @@ public:
     TEST_METHOD(follower_exec_test) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
       append_req_t req1 = empty_append_req({ 0,1 }, { 0,2 });
       entry_t exec_entry = {
@@ -631,7 +631,7 @@ public:
     TEST_METHOD(hearbeat_test) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
-      eh.e_provision_enclave({ 0,1 }, wf, peer_map);
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
       std::vector<uid_t> quorum;
       quorum.push_back({ 0,2 });
       make_leader(&eh, { 0,1 }, quorum, 1);
@@ -639,39 +639,10 @@ public:
       append_reqs.clear();
       election_reqs.clear();
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delta_heartbeat
+      std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat
       eh.e_set_time();
 
       Assert::IsTrue(append_reqs.size() == 1);
-    }
-
-    TEST_METHOD(missing_resp_test) {
-      leader_lock_msg_exec_sequence_test(); //leaves us in state with one missing response
-      command_reqs.clear();
-      append_reqs.clear();
-
-      Assert::IsTrue(command_reqs.size() == 0);
-
-      std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
-      eh.e_set_time();
-
-      Assert::IsTrue(command_reqs.size() == 1);
-      Assert::IsTrue(uids_equal(command_reqs[0].target, { 0,3 }));
-      Assert::IsTrue(append_reqs.size() == 1);
-
-      std::this_thread::sleep_for(std::chrono::milliseconds(600)); // delta_heartbeat = 500
-      eh.e_set_time();
-
-      Assert::IsTrue(command_reqs.size() == 2);
-      Assert::IsTrue(uids_equal(command_reqs[1].target, { 0,4 })); //test retry
-      Assert::IsTrue(append_reqs.size() == 2);
-
-      std::this_thread::sleep_for(std::chrono::milliseconds(600)); //delta_heartbeat = 500
-      eh.e_set_time();
-
-      Assert::IsTrue(command_reqs.size() == 3);
-      Assert::IsTrue(uids_equal(command_reqs[2].target, { 0,3 })); //test retry
-      Assert::IsTrue(append_reqs.size() == 3);
     }
 
     TEST_METHOD(missing_resp_test) {

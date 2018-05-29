@@ -83,13 +83,13 @@ public:
     }
   }
 
-  sgx_status_t e_provision_enclave(uid_t peer_id, dcr_workflow workflow, std::map<uid_t, uid_t, cmp_uids> peer_to_event_map) {
+  sgx_status_t e_configure_enclave(uid_t peer_id, dcr_workflow workflow, std::map<uid_t, uid_t, cmp_uids> peer_to_event_map) {
     intermediate_dcr_worflow temp = workflow.create_intermediate();
     uid_t* peer_map_peers = new uid_t[peer_to_event_map.size()];
     uid_t* peer_map_events = new uid_t[peer_to_event_map.size()];
     flatten_map(peer_to_event_map, peer_map_peers, peer_map_events);
     uint32_t peer_map_count = peer_to_event_map.size();
-    sgx_status_t status = provision_enclave(
+    sgx_status_t status = configure_enclave(
       eid,
       peer_id,                /* self_id */
       temp.event_ids, /* event_ids */

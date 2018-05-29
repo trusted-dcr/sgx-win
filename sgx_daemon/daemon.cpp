@@ -78,7 +78,7 @@ grpc::Status daemon::SgxDaemonImpl::Config(grpc::ServerContext* context, const t
 		std::cout << "    " << kv.first << " " << kv.second << std::endl;
 
 	std::cout << "[INFO] Injecting config into enclave" << std::endl;
-	base->enclave.e_provision_enclave(self, wf, peer_to_event);
+	base->enclave.e_configure_enclave(self, wf, peer_to_event);
 
 	return grpc::Status::OK;
 }

@@ -108,7 +108,7 @@ void update_timeout() {
   self.t = self.t_min + r;
 }
 
-void becomme_leader() {
+void become_leader() {
   self.last_checkpoint = self.find_latest_checkpoint();
   uint32_t index;
   if (self.has_unresolved_lock(index)) {
@@ -835,7 +835,7 @@ void recv_election_rsp(election_rsp_t rsp) {
   }
   heartbeat(); //victorious heartbeat message
 
-  becomme_leader();
+  become_leader();
 }
 
 void recv_log_req(log_req_t req) {}
@@ -865,7 +865,7 @@ void set_time(uint64_t ticks) {
 }
 
 
-void provision_enclave(
+void configure_enclave(
   uid_t self_id,
   uid_t* event_ids, uint32_t events_count,
   uid_t* excluded, uint32_t excluded_count,
