@@ -15,7 +15,6 @@ dcr_event simple_event(uid_t id) {
 
 dcr_workflow wf_simple_condition() {
    dcr_workflow wf;
-   wf.name = "simple condition workflow";
    dcr_event e1 = simple_event({ 0,1 });
    dcr_event e2 = simple_event({ 0,2 });
    wf.event_store[e1.id] = e1;
@@ -27,7 +26,6 @@ dcr_workflow wf_simple_condition() {
 
 dcr_workflow wf_simple_milestone() {
   dcr_workflow wf;
-  wf.name = "simple milestone workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
   e1.pending = true;
@@ -40,7 +38,6 @@ dcr_workflow wf_simple_milestone() {
 
 dcr_workflow wf_simple_include() {
   dcr_workflow wf;
-  wf.name = "simple include workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
   e2.excluded = true;
@@ -52,7 +49,6 @@ dcr_workflow wf_simple_include() {
 
 dcr_workflow wf_simple_exclude() {
   dcr_workflow wf;
-  wf.name = "simple exclude workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
   wf.event_store[e1.id] = e1;
@@ -63,7 +59,6 @@ dcr_workflow wf_simple_exclude() {
 
 dcr_workflow wf_simple_response() {
   dcr_workflow wf;
-  wf.name = "simple response workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
   wf.event_store[e1.id] = e1;
@@ -74,7 +69,6 @@ dcr_workflow wf_simple_response() {
 
 dcr_workflow wf_DU_DE() {
   dcr_workflow wf;
-  wf.name = "DU_DE workflow";
   dcr_event propose_DU = simple_event({ 0,1 });
   dcr_event propose_DE = simple_event({ 0,2 });
   dcr_event accept_DU = simple_event({ 0,3 });

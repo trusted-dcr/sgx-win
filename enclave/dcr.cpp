@@ -197,9 +197,8 @@ intermediate_dcr_worflow dcr_workflow::create_intermediate() {
   return ret;
 }
 
-dcr_workflow dcr_workflow::make_workflow(intermediate_dcr_worflow wf, char* name) {
-  dcr_workflow new_wf = { 0 };
-  new_wf.name = std::string(name);
+dcr_workflow dcr_workflow::make_workflow(intermediate_dcr_worflow wf) {
+	dcr_workflow new_wf;
 
   //set ids
   for (uint32_t i = 0; i < wf.events_count; i++) {

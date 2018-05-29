@@ -22,7 +22,6 @@ enclave {
 
 		public void provision_enclave(
 		 uid_t self_id,
-		 [in, string] char* wf_name,
 		 [in, count=events_count] uid_t* event_ids, uint32_t events_count,
 		 [in, count=excluded_count] uid_t* excluded, uint32_t excluded_count,
 		 [in, count=pending_count] uid_t* pending, uint32_t pending_count,

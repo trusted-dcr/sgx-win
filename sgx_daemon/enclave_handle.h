@@ -92,7 +92,6 @@ public:
     sgx_status_t status = provision_enclave(
       eid,
       peer_id,                /* self_id */
-      (char*)workflow.name.c_str(),  /* wf_name */
       temp.event_ids, /* event_ids */
       temp.events_count, /* events_count */
       temp.excluded, /* excluded */

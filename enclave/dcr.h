@@ -16,7 +16,6 @@ struct dcr_event {
 
 class dcr_workflow {
 public:
-  std::string name;
   std::map<uid_t, dcr_event, cmp_uids> event_store;
   std::map<uid_t, std::vector<uid_t>, cmp_uids> excludes_to; //read as outgoing excludes from given event_id
   std::map<uid_t, std::vector<uid_t>, cmp_uids> includes_to;
@@ -36,5 +35,5 @@ public:
 
   intermediate_dcr_worflow create_intermediate();
 
-  dcr_workflow make_workflow(intermediate_dcr_worflow wf, char* name);
+  dcr_workflow make_workflow(intermediate_dcr_worflow wf);
 };

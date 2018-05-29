@@ -33,7 +33,6 @@ namespace convert {
 
 	dcr_workflow from_wire(tdcr::dcr::Workflow from) {
 		dcr_workflow to;
-		to.name = from.name();
 
 		// events
 		for each (tdcr::dcr::Event wire_event in from.events()) {
