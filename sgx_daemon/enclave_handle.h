@@ -84,7 +84,6 @@ public:
   }
 
   sgx_status_t e_provision_enclave(uid_t peer_id, dcr_workflow workflow, std::map<uid_t, uid_t, cmp_uids> peer_to_event_map) {
-    uid_t wf_id = workflow.id;
     intermediate_dcr_worflow temp = workflow.create_intermediate();
     uid_t* peer_map_peers = new uid_t[peer_to_event_map.size()];
     uid_t* peer_map_events = new uid_t[peer_to_event_map.size()];
@@ -93,7 +92,6 @@ public:
     sgx_status_t status = provision_enclave(
       eid,
       peer_id,                /* self_id */
-      wf_id,                  /* wf_id */
       (char*)workflow.name.c_str(),  /* wf_name */
       temp.event_ids, /* event_ids */
       temp.events_count, /* events_count */
@@ -121,8 +119,8 @@ public:
       peer_map_peers,/* peer_map_peers */
       peer_map_events,/* peer_map_events */
       peer_to_event_map.size()/* peer_map_count */
-    );    
-    
+    );
+
     delete peer_map_events;
     delete peer_map_peers;
 

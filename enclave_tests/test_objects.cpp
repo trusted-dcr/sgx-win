@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "test_objects.h"
- 
+
 
 //workflows:
 
@@ -15,7 +15,6 @@ dcr_event simple_event(uid_t id) {
 
 dcr_workflow wf_simple_condition() {
    dcr_workflow wf;
-   wf.id = { 1,1 };
    wf.name = "simple condition workflow";
    dcr_event e1 = simple_event({ 0,1 });
    dcr_event e2 = simple_event({ 0,2 });
@@ -28,7 +27,6 @@ dcr_workflow wf_simple_condition() {
 
 dcr_workflow wf_simple_milestone() {
   dcr_workflow wf;
-  wf.id = { 1,1 };
   wf.name = "simple milestone workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
@@ -42,7 +40,6 @@ dcr_workflow wf_simple_milestone() {
 
 dcr_workflow wf_simple_include() {
   dcr_workflow wf;
-  wf.id = { 1,1 };
   wf.name = "simple include workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
@@ -55,7 +52,6 @@ dcr_workflow wf_simple_include() {
 
 dcr_workflow wf_simple_exclude() {
   dcr_workflow wf;
-  wf.id = { 1,1 };
   wf.name = "simple exclude workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
@@ -67,7 +63,6 @@ dcr_workflow wf_simple_exclude() {
 
 dcr_workflow wf_simple_response() {
   dcr_workflow wf;
-  wf.id = { 1,1 };
   wf.name = "simple response workflow";
   dcr_event e1 = simple_event({ 0,1 });
   dcr_event e2 = simple_event({ 0,2 });
@@ -79,7 +74,6 @@ dcr_workflow wf_simple_response() {
 
 dcr_workflow wf_DU_DE() {
   dcr_workflow wf;
-  wf.id = { 1,1 };
   wf.name = "DU_DE workflow";
   dcr_event propose_DU = simple_event({ 0,1 });
   dcr_event propose_DE = simple_event({ 0,2 });

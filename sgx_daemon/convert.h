@@ -1,6 +1,8 @@
 #pragma once
 #include "msg.h"
+#include "dcr.h"
 #include "protos\raft.pb.h"
+#include "protos\dcr.pb.h"
 
 namespace convert {
 	/** FROM WIRE **/
@@ -9,6 +11,8 @@ namespace convert {
 	void from_wire(tdcr::crypto::Mac128 from, sgx_cmac_128bit_tag_t& to);
 	command_tag_t from_wire(tdcr::raft::CommandTag from);
 	entry_t from_wire(tdcr::raft::Entry from);
+	dcr_event from_wire(tdcr::dcr::Event from);
+	dcr_workflow from_wire(tdcr::dcr::Workflow from);
 
 	/** TO WIRE **/
 

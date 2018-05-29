@@ -22,6 +22,54 @@ namespace convert {
 		return entry_t { from.index(), from.term(), from_wire(from.event()), from_wire(from.source()), from_wire(from.tag()) };
 	}
 
+	dcr_event from_wire(tdcr::dcr::Event from) {
+		return dcr_event {
+			from_wire(from.uid()),
+			from.executed(),
+			from.excluded(),
+			from.pending()
+		};
+	}
+
+	dcr_workflow from_wire(tdcr::dcr::Workflow from) {
+		dcr_workflow to;
+		to.name = from.name();
+
+		// events
+		for each (tdcr::dcr::Event wire_event in from.events()) {
+			dcr_event event = from_wire(wire_event);
+			to.event_store[event.id] = event;
+
+			// excludes
+			for each (tdcr::network::Uid wire_target in wire_event.excluderelations())
+				to.excludes_to[event.id].push_back(from_wire(wire_target));
+
+			// includes
+			for each (tdcr::network::Uid wire_target in wire_event.includerelations())
+				to.includes_to[event.id].push_back(from_wire(wire_target));
+
+			// responses
+			for each (tdcr::network::Uid wire_target in wire_event.responserelations())
+				to.responses_to[event.id].push_back(from_wire(wire_target));
+
+			// conditions
+			for each (tdcr::network::Uid wire_target in wire_event.conditionrelations()) {
+				uid_t target = from_wire(wire_target);
+				to.conditions_to[event.id].push_back(target);
+				to.conditions_from[target].push_back(event.id);
+			}
+
+			// conditions
+			for each (tdcr::network::Uid wire_target in wire_event.milestonerelations()) {
+				uid_t target = from_wire(wire_target);
+				to.milestones_to[event.id].push_back(target);
+				to.milestones_from[target].push_back(event.id);
+			}
+		}
+
+		return to;
+	}
+
 	/** TO WIRE **/
 
 	tdcr::network::Uid to_wire(uid_t from) {

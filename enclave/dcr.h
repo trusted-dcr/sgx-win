@@ -16,7 +16,6 @@ struct dcr_event {
 
 class dcr_workflow {
 public:
-  uid_t id;
   std::string name;
   std::map<uid_t, dcr_event, cmp_uids> event_store;
   std::map<uid_t, std::vector<uid_t>, cmp_uids> excludes_to; //read as outgoing excludes from given event_id

@@ -867,7 +867,6 @@ void set_time(uint64_t ticks) {
 
 void provision_enclave(
   uid_t self_id,
-  uid_t wf_id,
   char* wf_name,
   uid_t* event_ids, uint32_t events_count,
   uid_t* excluded, uint32_t excluded_count,
@@ -913,7 +912,6 @@ void provision_enclave(
 
   //transform intermediate
   self.workflow = self.workflow.make_workflow(wf,wf_name);
-  self.workflow.id = wf_id;
 
   self.peer_to_event_map = create_peer_to_event_map(peer_map_peers, peer_map_events, peer_map_count, self.id, &self.cluster_event);
   self.leader_map = pick_leaders(self.peer_to_event_map);

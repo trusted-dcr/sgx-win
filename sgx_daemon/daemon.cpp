@@ -1,7 +1,8 @@
 #include <iomanip>
+#include <winsock2.h>
 #include "daemon.h"
 #include "convert.h"
-#include <winsock2.h>
+#include "dcr.cpp"
 
 std::ostream& operator<< (std::ostream& stream, const uid_t& uid) {
 	uint8_t* bytes = (uint8_t*)&uid;
@@ -51,31 +52,33 @@ void daemon::async_send(tdcr::network::Container cont) {
 
 grpc::Status daemon::SgxDaemonImpl::Config(grpc::ServerContext* context, const tdcr::sgxd::SgxConfig* conf, google::protobuf::Empty* response) {
 	uid_t self = convert::from_wire(conf->self());
-	uid_t cluster = { 0 };
-	for each (tdcr::sgxd::SgxConfig::Peer peer in conf->peers()) {
-		uid_t event = convert::from_wire(peer.event());
-		if (event == self) {
-			cluster = event;
-			break;
-		}
-	}
-
-	std::cout << "[INFO] Received config from " << context->peer() << std::endl;
-	std::cout << "  own uid: " << self << std::endl;
-	std::cout << "  cluster: " << cluster << std::endl;
-	std::cout << "  workflow size: " << conf->workflow().events_size() << std::endl;
+	dcr_workflow wf = convert::from_wire(conf->workflow());
+	std::map<uid_t, uid_t, cmp_uids> peer_to_event;
 
 	for each (tdcr::sgxd::SgxConfig::Peer peer in conf->peers()) {
 		uid_t peer_uid = convert::from_wire(peer.uid());
+
+		// event
+		peer_to_event[peer_uid] = convert::from_wire(peer.event());
+
+		// addr
 		in_addr peer_ip;
 		peer_ip.s_addr = peer.addr().ip();
 		std::string peer_ip_str(inet_ntoa(peer_ip));
 		base->addrs[peer_uid] = peer_ip_str + ":" + std::to_string(peer.addr().port());
 	}
 
+	std::cout << "[INFO] Received config from " << context->peer() << std::endl;
+	std::cout << "  own uid: " << self << std::endl;
+	std::cout << "  cluster: " << peer_to_event[self] << std::endl;
+	std::cout << "  workflow size: " << conf->workflow().events_size() << std::endl;
+
 	std::cout << "  routes:" << std::endl;
 	for each (std::pair<uid_t, std::string> kv in base->addrs)
 		std::cout << "    " << kv.first << " " << kv.second << std::endl;
+
+	std::cout << "[INFO] Injecting config into enclave" << std::endl;
+	base->enclave.e_provision_enclave(self, wf, peer_to_event);
 
 	return grpc::Status::OK;
 }
