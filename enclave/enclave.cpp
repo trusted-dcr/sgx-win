@@ -821,8 +821,19 @@ void recv_election_rsp(election_rsp_t rsp) {
 void recv_log_req(log_req_t req) {}
 void recv_log_rsp(log_rsp_t rsp) {}
 
-void execute(uid_t event) {
-
+void execute(uid_t event_id) {
+  command_req_t exec_init = {
+    self.leader_map[event_id], /* target */
+    self.id, /* source */
+    command_tag_t { 
+      generate_random_uid(), 
+      LOCK 
+    },
+    event_id,
+    {0}
+  };
+  set_mac_flat_msg<command_req_t>(&exec_init);
+  send_command_req(exec_init);
 }
 
 void get_log() {
