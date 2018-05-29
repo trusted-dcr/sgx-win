@@ -260,3 +260,36 @@ poll_rsp_t empty_poll_rsp(uid_t target, uid_t source) {
   };
   return rsp;
 }
+
+entry_t* entries1() {
+  entry_t entries1[3];
+  entry_t e1 = {
+    0,
+    0,
+    uid_t {0,1},
+    {0,3},
+    {uid_t {0,12}, CHECKPOINT}
+  };
+
+  entry_t e2 = {
+    0,
+    1,
+    uid_t{ 0,1 },
+    { 0,5 },
+    { uid_t{ 0,13 }, EXEC }
+  };
+
+  entry_t e3 = {
+    0,
+    2,
+    uid_t{ 0,1 },
+    { 0,7 },
+    { uid_t{ 0,14 }, LOCK }
+  };
+
+  entries1[0] = e1;
+  entries1[1] = e2;
+  entries1[2] = e3;
+  return entries1;
+}
+

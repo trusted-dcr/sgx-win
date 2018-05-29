@@ -23,6 +23,11 @@ std::vector<poll_rsp_t> poll_rsps;
 std::vector<election_req_t> election_reqs;
 std::vector<election_rsp_t> election_rsps;
 
+std::vector<log_req_t> log_reqs;
+std::vector<log_rsp_t> log_rsps;
+
+std::map<uid_t, std::vector<entry_t>, cmp_uids> event_to_log_map;
+
 bool simulate = false;
 
 void make_leader(enclave_handle* eh, uid_t target, std::vector<uid_t> quorum, uint32_t new_term) {
@@ -345,6 +350,7 @@ public:
       poll_rsps.clear();
       election_reqs.clear();
       election_rsps.clear();
+      event_to_log_map.clear();
     }
 
     TEST_METHOD(sanity_mac_test) {
@@ -400,7 +406,12 @@ public:
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
       eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
+      Assert::AreEqual(0, (int)poll_reqs.size());
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(8000)); // delta_max
+      eh.e_set_time();
       Assert::AreEqual(1, (int)poll_reqs.size());
+
       poll_req_t req = poll_reqs[0];
       bool valid = eh.e_test_verify_mac_poll_req(req);
       Assert::IsTrue(valid);
@@ -411,6 +422,8 @@ public:
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
       eh.e_configure_enclave({ 0,1 }, wf, peer_map);
 
+      std::this_thread::sleep_for(std::chrono::milliseconds(8000)); // delta_max
+      eh.e_set_time();
       Assert::AreEqual(1, (int)poll_reqs.size());
       poll_req_t req = poll_reqs[0];
       bool valid = eh.e_test_verify_mac_poll_req(req);
@@ -673,8 +686,142 @@ public:
       Assert::IsTrue(uids_equal(command_reqs[6].target, { 0,3 })); //test retry
       Assert::IsTrue(append_reqs.size() == 3);
     }
-  };
   
+    TEST_METHOD(get_log_map_size_test) {
+      leader_lock_msg_exec_sequence_test(); //lots of executions
+      command_reqs.clear();
+      command_rsps.clear();
+      append_reqs.clear();
+      append_rsps.clear();
+      poll_reqs.clear();
+      poll_rsps.clear();
+      election_reqs.clear();
+      election_rsps.clear();
+      log_reqs.clear();
+      log_rsps.clear();
+
+      eh.e_get_log();
+
+      Assert::IsTrue(log_reqs.size() == 5);
+
+      Assert::IsTrue(event_to_log_map.size() == 0);
+      eh.e_recv_log_req(log_reqs[0]);
+      Assert::IsTrue(log_rsps.size() == 1);
+      entry_t* entries_new = (entry_t*) malloc(sizeof(entry_t) * 3);
+      memcpy(entries_new, entries1(), sizeof(entry_t) * 3);
+      log_rsp_t rsp = {
+        uid_t {0,1},
+        {0,1},
+        true,
+        uid_t {0,0},
+        entries_new,
+        3,
+        {0}
+      };
+
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      rsp.source = { 0,3 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      rsp.source = { 0,5 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      rsp.source = { 0,7 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      rsp.source = { 0,9 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 5);
+
+      for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
+        Assert::IsTrue(event_to_log.second.size() == 3);
+      }
+    }
+
+    TEST_METHOD(get_log_map_size_variable_test) {
+      leader_lock_msg_exec_sequence_test(); //lots of executions
+      command_reqs.clear();
+      command_rsps.clear();
+      append_reqs.clear();
+      append_rsps.clear();
+      poll_reqs.clear();
+      poll_rsps.clear();
+      election_reqs.clear();
+      election_rsps.clear();
+      log_reqs.clear();
+      log_rsps.clear();
+
+      eh.e_get_log();
+
+      Assert::IsTrue(log_reqs.size() == 5);
+
+      Assert::IsTrue(event_to_log_map.size() == 0);
+      eh.e_recv_log_req(log_reqs[0]);
+      Assert::IsTrue(log_rsps.size() == 1);
+      entry_t* entries_new = (entry_t*)malloc(sizeof(entry_t) * 4);
+      memcpy(entries_new, entries1(), sizeof(entry_t) * 3);
+      log_rsp_t rsp = {
+        uid_t{ 0,1 },
+        { 0,1 },
+        true,
+        uid_t{ 0,0 },
+        entries_new,
+        3,
+        { 0 }
+      };
+
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      memcpy(entries_new, entries1(), sizeof(entry_t) * 4);
+      entries_new[4] = entry_t{
+        1,
+        2,
+        uid_t {0,4},
+        uid_t{ 0,4 },
+        command_tag_t {0,352, EXEC}
+      };
+      rsp.entries_n = 4;
+
+      rsp.source = { 0,3 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      rsp.source = { 0,5 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      rsp.source = { 0,7 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 0);
+
+      rsp.source = { 0,9 };
+      rsp = eh.e_test_set_mac_log_rsp(rsp);
+      eh.e_recv_log_rsp(rsp);
+      Assert::IsTrue(event_to_log_map.size() == 5);
+
+      for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
+        if (uids_equal(event_to_log.first, { 0,1 }))
+          Assert::IsTrue(event_to_log.second.size() == 3);
+        else
+          Assert::IsTrue(event_to_log.second.size() == 4);
+      }
+    }
+  };
 }
 
 
@@ -722,11 +869,34 @@ void send_election_rsp(election_rsp_t rsp) {
 }
 
 void send_log_req(log_req_t req) {
-	// TODO
+  log_reqs.push_back(req);
 }
 
-void send_log_rsp(log_rsp_t rsp) {
-	// TODO
+void send_log_rsp(log_rsp_t rsp, entry_t* entries, int size) {
+  rsp.entries = entries;
+  log_rsps.push_back(rsp);
+}
+
+void return_logs(entry_t* flat_entry_list, uint32_t entry_length,
+  uid_t* event_uids, uint32_t id_length,
+  uint32_t* offset_list) {
+
+  uint32_t acc = 0;
+  uint32_t j = 0;
+  for (uint32_t i = 0; i < id_length; i++) {
+    for (j = 0; j < offset_list[i]; j++) {
+      uid_t event_id = event_uids[i];
+      entry_t entry = flat_entry_list[acc + j];
+      if (event_to_log_map.find(event_id) == event_to_log_map.end())
+        event_to_log_map[event_id] = std::vector<entry_t>();
+      event_to_log_map[event_id].push_back(entry);
+    }
+    acc = acc + j;
+  }
+  for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
+    uid_t event = event_to_log.first;
+    std::vector<entry_t> log = event_to_log.second;
+  }
 }
 
 #endif // SGX_DEBUG

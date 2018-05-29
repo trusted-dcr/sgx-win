@@ -11,7 +11,7 @@ template<typename T>
 sgx_status_t get_mac_list(T* list, uint32_t length, sgx_cmac_128bit_tag_t* tag) {
   sgx_status_t ret;
   uint8_t zero[16] = { 0 };
-  memcpy(tag, zero, SGX_AESGCM_MAC_SIZE);
+  memcpy(tag, zero, SGX_CMAC_MAC_SIZE);
   if(length > 0)
     ret = sgx_rijndael128_cmac_msg(&p_key, (uint8_t*)list, sizeof(T)*length, tag);
   return ret;
@@ -20,7 +20,7 @@ sgx_status_t get_mac_list(T* list, uint32_t length, sgx_cmac_128bit_tag_t* tag) 
 template<typename T>
 sgx_status_t get_mac_flattened(T* msg, sgx_cmac_128bit_tag_t* tag) {
   uint8_t zero[16] = { 0 };
-  memcpy(tag, zero, SGX_AESGCM_MAC_SIZE);
+  memcpy(tag, zero, SGX_CMAC_MAC_SIZE);
   sgx_status_t ret = sgx_rijndael128_cmac_msg(&p_key, (uint8_t*)msg, (uint64_t)msg->mac - (uint64_t)msg, tag); //WHY 4????!?!?!?!
   return ret;
 }
@@ -44,3 +44,7 @@ sgx_status_t validate_flat_msg(T* msg, bool& valid) {
 sgx_status_t set_mac_append_req(append_req_t* append_req);
 
 sgx_status_t validate_append_req(append_req_t* append_req, bool& valid);
+
+sgx_status_t set_mac_log_rsp(log_rsp_t* log_rsp);
+
+sgx_status_t validate_log_rsp(log_rsp_t* log_rsp, bool& valid);

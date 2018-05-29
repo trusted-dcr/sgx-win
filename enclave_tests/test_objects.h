@@ -30,3 +30,4 @@ log_rsp_t empty_log_rsp(uid_t target, uid_t source);
 poll_req_t empty_poll_req(uid_t target, uid_t source);
 poll_rsp_t empty_poll_rsp(uid_t target, uid_t source);
 
+entry_t* entries1();

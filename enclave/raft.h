@@ -56,6 +56,9 @@ public:
   //lock
   int64_t locked_entry_index;
 
+  //logs (for global state collection)
+  std::map<uid_t, std::vector<entry_t>, cmp_uids> event_to_log_map;
+
   void init();
 
   entry_t last_entry();

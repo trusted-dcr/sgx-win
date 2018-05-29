@@ -49,6 +49,9 @@ enclave {
         public election_req_t test_set_mac_election_req(election_req_t req);
         public election_rsp_t test_set_mac_election_rsp(election_rsp_t rsp);
 
+        public log_rsp_t test_set_mac_log_rsp(log_rsp_t rsp);
+
+
         public bool test_verify_mac_poll_req(poll_req_t req);
 
 		public void test_execute(uid_t event_id);
@@ -78,6 +81,10 @@ enclave {
         void send_election_rsp(election_rsp_t rsp);
 
         void send_log_req(log_req_t req);
-        void send_log_rsp(log_rsp_t rsp);
+        void send_log_rsp(log_rsp_t rsp, [in, count=size] entry_t* entries, int size);
+
+        void return_logs([in, count=entry_length] entry_t* flat_entry_list, uint32_t entry_length,
+						  [in, count=id_length]uid_t* event_uids, uint32_t id_length,
+						  [in, count=id_length]uint32_t* offset_list);
     };
 };

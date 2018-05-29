@@ -92,6 +92,15 @@ void mac_and_send_append_req(append_req_t msg) {
   send_append_req(msg,msg.entries,msg.entries_n);
 }
 
+void mac_and_send_log_rsp(log_rsp_t msg) {
+  sgx_status_t status;
+  do {
+    status = set_mac_log_rsp(&msg);
+  } while (status != SGX_SUCCESS);
+
+  send_log_rsp(msg, msg.entries, msg.entries_n);
+}
+
 void update_timeout() {
   if (self.role == LEADER) {
     self.t = self.now + delta_heartbeat;
@@ -818,8 +827,103 @@ void recv_election_rsp(election_rsp_t rsp) {
   become_leader();
 }
 
-void recv_log_req(log_req_t req) {}
-void recv_log_rsp(log_rsp_t rsp) {}
+void recv_log_req(log_req_t req) {
+  bool valid;
+  validate_flat_msg<log_req_t>(&req, valid);
+  if (!valid)
+    return;
+
+  if (!uids_equal(self.id, req.target))
+    return; //not intended recipient
+  
+  log_rsp_t rsp;
+  std::vector<entry_t> entries;
+  if (self.role == LEADER) {
+    for (uint32_t i = 0; i < self.get_commit_index()+1; i++) {
+      entries.push_back(self.log[i]);
+    }
+    entry_t* entries_list = new entry_t[entries.size()];
+    std::copy(entries.begin(), entries.end(), entries_list);
+    rsp = {
+      req.source, /* target */
+      self.id, /* source */
+      true, /* success */
+      empty_uid, /* leader */
+      entries_list,/* entries */
+      self.get_commit_index()+1, /* entries_n */
+      {0}/* mac */
+    };
+  }
+  else {
+    entries.push_back(get_empty_entry()); //to prevent nullptr
+    rsp = {
+      req.source, /* target */
+      self.id, /* source */
+      false, /* success */
+      self.leader, /* leader */
+      &entries[0],/* entries */
+      0, /* entries_n */
+      { 0 }/* mac */
+    };
+  }
+  mac_and_send_log_rsp(rsp);
+}
+
+void recv_log_rsp(log_rsp_t rsp) {
+  // copy entries to protected memory
+  entry_t* prot_entries = new entry_t[rsp.entries_n];
+  memcpy(prot_entries, rsp.entries, sizeof(entry_t) * rsp.entries_n);
+  rsp.entries = prot_entries;
+
+  bool valid;
+  validate_log_rsp(&rsp, valid);
+  if (!valid)
+    return;
+
+  uid_t event_id = self.peer_to_event_map[rsp.source];
+
+  if (!rsp.success) {
+    self.leader_map[event_id] = rsp.leader;
+    log_req_t req = {
+      self.leader_map[event_id],
+      self.id,
+      { 0 }
+    };
+    mac_and_send_msg<log_req_t>(req, set_mac_flat_msg<log_req_t>, send_log_req);
+    return;
+  }
+
+  self.event_to_log_map[event_id].clear();
+
+  for (int i = 0; i < rsp.entries_n; i++) {
+    self.event_to_log_map[event_id].push_back(rsp.entries[i]);
+  }
+
+  //check if we´re done
+  for each (std::pair<uid_t, dcr_event> event in self.workflow.event_store) {
+    if (self.event_to_log_map[event.first].size() == 0) //not done
+      return;
+  }
+  
+  //we're done -- create structure, and return to daemon
+  std::vector<entry_t> flat_entry_list;
+  std::vector<uid_t> event_id_list;
+  std::vector<uint32_t> offset_list;
+
+  for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in self.event_to_log_map) {
+    for each (entry_t entry in event_to_log.second) {
+      flat_entry_list.push_back(entry);
+    }
+    event_id_list.push_back(event_to_log.first);
+    offset_list.push_back(event_to_log.second.size());
+  }
+
+  return_logs(&flat_entry_list[0], flat_entry_list.size(),
+    &event_id_list[0], event_id_list.size(),
+    &offset_list[0]);
+
+  self.event_to_log_map.clear();
+}
 
 void execute(uid_t event_id) {
   command_req_t exec_init = {
@@ -837,7 +941,17 @@ void execute(uid_t event_id) {
 }
 
 void get_log() {
-
+  std::vector<log_req_t> log_reqs;
+  for each (std::pair<uid_t, dcr_event> event in self.workflow.event_store) {
+    self.event_to_log_map[event.first].clear();
+    log_req_t req = {
+      self.leader_map[event.first],
+      self.id,
+      {0}
+    };
+    log_reqs.push_back(req);
+  }
+  mac_and_broadcast_msgs<log_req_t>(log_reqs, set_mac_flat_msg<log_req_t>, send_log_req);
 }
 
 void timeout() {
@@ -858,8 +972,9 @@ void timeout() {
 }
 
 void set_time(uint64_t ticks) {
+  bool startup = self.now == 0;
   self.now = ticks;
-  if (self.now > self.t)
+  if (self.now > self.t && !startup)
     timeout();
 }
 
@@ -906,6 +1021,7 @@ void configure_enclave(
   self.id = self_id;
   self.log.push_back(get_empty_entry());
   self.retried_responses = false;
+  self.now = 0;
 
   //transform intermediate
   self.workflow = self.workflow.make_workflow(wf);
@@ -1003,6 +1119,15 @@ election_rsp_t test_set_mac_election_rsp(election_rsp_t rsp) {
     throw - 100;
   return rsp;
 }
+
+log_rsp_t test_set_mac_log_rsp(log_rsp_t rsp) {
+  sgx_status_t status;
+  status = set_mac_log_rsp(&rsp);
+  if (status != SGX_SUCCESS)
+    throw - 100;
+  return rsp;
+}
+
 
 bool test_verify_mac_poll_req(poll_req_t req) {
   sgx_status_t status;

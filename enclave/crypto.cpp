@@ -47,3 +47,44 @@ sgx_status_t validate_append_req(append_req_t* append_req, bool& valid) {
 
   return ret;
 }
+
+
+//log_rsp_t is nested
+sgx_status_t get_mac_log_rsp(log_rsp_t* log_rsp, sgx_cmac_128bit_tag_t* tag) {
+  log_rsp_t cpy = { 0 };
+  cpy.entries_n = log_rsp->entries_n;
+  cpy.source = log_rsp->source;
+  cpy.target = log_rsp->target;
+  cpy.leader = log_rsp->leader;
+  cpy.success = log_rsp->success;
+  cpy.entries = 0;
+
+  sgx_cmac_128bit_tag_t tags[2];
+  sgx_status_t ret = get_mac_flattened<log_rsp_t>(&cpy, &tags[0]);
+  if (ret != SGX_SUCCESS)
+    return ret;
+
+  ret = get_mac_list<entry_t>(log_rsp->entries, log_rsp->entries_n, &tags[1]);
+  if (ret != SGX_SUCCESS)
+    return ret;
+
+  return get_mac_list<sgx_cmac_128bit_tag_t>(tags, 2, tag);
+}
+
+
+
+sgx_status_t set_mac_log_rsp(log_rsp_t* log_rsp) {
+  sgx_cmac_128bit_tag_t tag;
+  sgx_status_t ret = get_mac_log_rsp(log_rsp, &tag);
+  memcpy(log_rsp->mac, tag, SGX_CMAC_MAC_SIZE);
+
+  return ret;
+}
+
+sgx_status_t validate_log_rsp(log_rsp_t* log_rsp, bool& valid) {
+  sgx_cmac_128bit_tag_t tag;
+  sgx_status_t ret = get_mac_log_rsp(log_rsp, &tag);
+  valid = cmp_macs(log_rsp->mac, tag);
+
+  return ret;
+}

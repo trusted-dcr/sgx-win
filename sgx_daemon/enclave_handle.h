@@ -68,6 +68,10 @@ public:
     return set_time(eid, ticks);
   }
 
+  sgx_status_t e_get_log() {
+    return get_log(eid);
+  }
+
   void flatten_map(std::map<uid_t, uid_t, cmp_uids> in_map, uid_t* peers_list, uid_t* events_list) {
     std::vector<uid_t> peers;
     std::vector<uid_t> events;
@@ -203,6 +207,12 @@ public:
   election_rsp_t e_test_set_mac_election_rsp(election_rsp_t rsp) {
     election_rsp_t ret;
     sgx_status_t status = test_set_mac_election_rsp(eid, &ret, rsp);
+    return ret;
+  }
+
+  log_rsp_t e_test_set_mac_log_rsp(log_rsp_t rsp) {
+    log_rsp_t ret;
+    sgx_status_t status = test_set_mac_log_rsp(eid, &ret, rsp);
     return ret;
   }
 
