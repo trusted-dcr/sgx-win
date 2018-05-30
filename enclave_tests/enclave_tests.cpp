@@ -447,6 +447,22 @@ public:
       Assert::IsTrue(eh.e_test_is_leader());
     }
 
+    TEST_METHOD(test_append_req_mac) {
+      dcr_workflow wf = wf_DU_DE();
+      std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
+      std::vector<uid_t> quorum;
+      quorum.push_back({ 0,2 });
+      make_leader(&eh, { 0,1 }, quorum, 1);
+
+      Assert::IsTrue(append_reqs.size() == 1);
+      append_req_t append1 = append_reqs[0];
+      append_req_t append2 = eh.e_test_set_mac_append_req(append_reqs[0]);
+      int cmp = memcmp(append1.mac, append2.mac, SGX_CMAC_MAC_SIZE);
+      Assert::IsTrue(cmp == 0);
+
+    }
+
     TEST_METHOD(leader_exec_is_executing_test) {
       dcr_workflow wf = wf_DU_DE();
       std::map<uid_t, uid_t, cmp_uids> peer_map = six_peers_two_peer_per_event_peer_map();

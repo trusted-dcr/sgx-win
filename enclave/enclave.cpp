@@ -69,10 +69,11 @@ void mac_and_broadcast_msgs(std::vector<T> msgs, U mac, V send) {
 }
 
 void mac_and_broadcast_append_req(std::vector<append_req_t> msgs) {
-  for each (append_req_t msg in msgs) {
+  for (uint32_t i = 0; i < msgs.size(); i++) {
+    append_req_t* msg = &msgs[i];
     sgx_status_t status;
     do {
-      status = set_mac_append_req(&msg);
+      status = set_mac_append_req(msg);
     } while (status != SGX_SUCCESS);
   }
   for each (append_req_t msg in msgs) {
