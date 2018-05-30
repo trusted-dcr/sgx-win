@@ -1,6 +1,7 @@
 #pragma once
 #include "dcr.h"
 #include "raft.h"
+#include "print_util.h"
 
 std::map<uid_t, uid_t, cmp_uids> create_peer_to_event_map(uid_t* peers, uid_t* events, uint32_t map_size, uid_t own_id, uid_t* cluster_event) {
   std::map<uid_t, uid_t, cmp_uids> peer_to_event_map;

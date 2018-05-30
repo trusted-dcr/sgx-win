@@ -10,8 +10,7 @@
 
 enum role_t { FOLLOWER, CANDIDATE, LEADER };
 
-const uid_t empty_uid = { 0 };
-const uint64_t delta_heartbeat = 500;
+const uint64_t delta_heartbeat = 5000;
 const uint64_t delta_min_time = 2*delta_heartbeat;
 const uint64_t delta_max_time = 16*delta_heartbeat;
 const uint64_t delta_lock_time = 50 * delta_heartbeat;

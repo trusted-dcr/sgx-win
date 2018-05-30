@@ -338,6 +338,7 @@
     <ClInclude Include="intermediate_types.h" />
     <ClInclude Include="msg.h" />
     <ClInclude Include="msg_util.h" />
+    <ClInclude Include="print_util.h" />
     <ClInclude Include="raft.h" />
   </ItemGroup>
   <ItemGroup>

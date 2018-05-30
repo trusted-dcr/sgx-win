@@ -34,7 +34,7 @@ enclave {
 		 [in, count=peer_map_count] uid_t* peer_map_peers, [in, count=peer_map_count] uid_t* peer_map_events, uint32_t peer_map_count);
 
 		 public void execute(uid_t event);
-		 public void get_log();
+		 public void get_history();
 
 #ifdef SGX_DEBUG
         public command_req_t test_set_mac_command_req(command_req_t req);
@@ -83,7 +83,7 @@ enclave {
         void send_log_req(log_req_t req);
         void send_log_rsp(log_rsp_t rsp, [in, count=size] entry_t* entries, int size);
 
-        void return_logs([in, count=entry_length] entry_t* flat_entry_list, uint32_t entry_length,
+        void return_history([in, count=entry_length] entry_t* flat_entry_list, uint32_t entry_length,
 						  [in, count=id_length]uid_t* event_uids, uint32_t id_length,
 						  [in, count=id_length]uint32_t* offset_list);
 

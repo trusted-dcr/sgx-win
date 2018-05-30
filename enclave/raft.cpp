@@ -31,10 +31,11 @@ entry_t peer::last_entry() {
 
 void peer::update_term(uint32_t new_term, uid_t new_leader) {
   term = new_term;
-  endorsement = { 0 };
+  endorsement = empty_uid;
   poll_votes = 1;
   election_votes = 1;
   leader = new_leader;
+	leader_map[cluster_event] = new_leader;
 }
 
 bool peer::term_and_index_exist_in_log(uint32_t term, uint32_t index) {
@@ -83,7 +84,7 @@ uint32_t peer::largest_majority_index() {
 
   std::sort(indices_vector.begin(), indices_vector.end());
   uint32_t index = indices_vector[(indices_vector.size() - 1) / 2];
- 
+
   return index;
 }
 
@@ -162,14 +163,14 @@ uid_t peer::find_other_peer_in_cluster(uid_t old_source) {
       event_id = peer_to_event.second;
     }
   }
-  
+
   //then find all peers in the same cluster
   std::vector<uid_t> cluster_peers;
   for each (std::pair<uid_t,uid_t> peer_to_event in peer_to_event_map) {
-    if (uids_equal(peer_to_event.second, event_id) && 
-      !uids_equal(peer_to_event.first, old_source) && 
+    if (uids_equal(peer_to_event.second, event_id) &&
+      !uids_equal(peer_to_event.first, old_source) &&
       !uids_equal(peer_to_event.first, id)) //this last check should never happen
-    { 
+    {
       cluster_peers.push_back(peer_to_event.first);
     }
   }

@@ -109,9 +109,9 @@ public:
     mtx.unlock();
     return status;
 	}
-	sgx_status_t e_get_log() {
+	sgx_status_t e_get_history() {
     mtx.lock();
-		sgx_status_t status = get_log(eid);
+		sgx_status_t status = get_history(eid);
     mtx.unlock();
     return status;
 	}

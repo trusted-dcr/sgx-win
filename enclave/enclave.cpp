@@ -1,6 +1,7 @@
 #include <string>
 #include "enclave_t.h"
 #include "enclave_helpers.h"
+#include "print_util.h"
 
 peer self;
 
@@ -11,19 +12,19 @@ bool verify_mac_and_own_term(T* msg, U validate_mac) {
   bool is_valid_message = false;
   validate_mac(msg, is_valid_message);
 	if (!is_valid_message) {
-		print("[WARN] Invalid MAC\n");
+		printn("[WARN] Invalid MAC");
 		return false; //invalid mac
 	}
 
   //verify that we are the intended receiver
 	if (!uids_equal(msg->target, self.id)) {
-		print("[WARN] Received message with wrong target\n");
+		printn("[WARN] Received message with wrong target");
     return false;
 	}
 
   //verify term
   if (msg->term > self.term) {
-		print("[WARN] Term overtaken -- converting to follower\n");
+		printn("[WARN] Term overtaken -- converting to follower");
     self.update_term(msg->term, msg->source);
     self.locked_entry_index = -1;
     self.role = FOLLOWER;
@@ -135,6 +136,7 @@ void become_leader() {
     self.locked_entry_index = -1;
   }
   self.role = LEADER;
+	self.leader_map[self.cluster_event] = self.id;
   update_timeout();
 }
 bool min_time_exceeded() {
@@ -453,8 +455,10 @@ void start_poll() {
 void recv_command_req(command_req_t req) {
   bool valid = false;
   validate_flat_msg<command_req_t>(&req, valid);
-  if (!valid)
-    return;
+	if (!valid) {
+		printn("[WARN] Invalid MAC");
+		return;
+	}
 
   //verify that we are the intended receiver
   if (!uids_equal(req.target, self.id))
@@ -478,6 +482,7 @@ void recv_command_req(command_req_t req) {
   uint32_t index_of_duplicate;
   if (self.exist_in_log(req.tag, index_of_duplicate)) { //duplicate command
     if (index_of_duplicate <= self.get_commit_index()) { // entry is already committed -- send success to client
+			printn("[WARN] Duplicate <COMMAND_REQUEST>: " + to_string(req.tag.uid));
       command_rsp_t rsp = {
         req.source,   /* target */
         self.id,      /* source */
@@ -496,6 +501,7 @@ void recv_command_req(command_req_t req) {
   if (req.tag.type == LOCK) {
   //check for lock
     if (self.has_unresolved_lock()) { // our event is locked -- two locks is not allowed
+			printn("[WARN] Contested <COMMAND_REQUEST>");
       command_rsp_t rsp = {
         req.source,   /* target */
         self.id,      /* source */
@@ -514,6 +520,7 @@ void recv_command_req(command_req_t req) {
   // we're not locked -- check lock-event and possibly enabledness
     if (uids_equal(req.event, self.cluster_event)) { // we are being locked on our cluster's event id, i.e we're starting an executing
       if (!self.workflow.is_event_enabled(self.cluster_event)) {  // we cannot execute our event, and must reject the command
+				printn("[WARN] Event of <COMMAND_REQUEST> not enabled");
         command_rsp_t rsp = {
           req.source,   /* target */
           self.id,      /* source */
@@ -544,7 +551,8 @@ void recv_command_req(command_req_t req) {
   };
 
   //add entry to log, and update cluster
-  append_to_log(entry);
+	printn("[INFO] Starting execution of " + to_string(req.event));
+	append_to_log(entry);
 }
 
 void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed for dcr/locking logic.
@@ -668,6 +676,7 @@ void recv_append_req(append_req_t req) {
     update_timeout();
 
   if (!self.term_and_index_exist_in_log(req.prev_term, req.prev_index)) { // we're not up to date, requst old appends
+		printn("[WARN] <APPEND_REQUEST> has unknown previous entry");
     append_rsp_t rsp = {
       req.source,       /*target*/
       self.id,          /*source*/
@@ -682,9 +691,12 @@ void recv_append_req(append_req_t req) {
   }
   else { // we're up to date, update log with new entries
     self.remove_elements_after(req.prev_index);
+		print("[INFO] Appending logs:");
     for (uint32_t i = 0; i < req.entries_n; i++) {
       self.log.push_back(req.entries[i]);
+			print(" " + to_string(req.entries[i]));
     }
+		print("\n");
 
     if (req.commit_index > self.get_commit_index()) {
       update_commit_index(std::min(req.commit_index, (uint32_t)self.log.size()-1));
@@ -722,9 +734,10 @@ void recv_append_rsp(append_rsp_t rsp) {
       update_commit_index(N);
   }
   else { // follower behind, send missing entries
+		printn("[WARN] Follower is behind -- synchronizing");
     entry_t prev = self.log[rsp.prev_index - 1]; //check indexing!?
-    entry_t* entries = &(self.log[rsp.prev_index]);
-    uint32_t entries_n = self.log.size()-1 - rsp.prev_index;
+    entry_t* entries = &self.log[rsp.prev_index];
+    uint32_t entries_n = self.log.size() - rsp.prev_index;
     append_req_t req = {
       rsp.source,   /* target */
       self.id,            /* source */
@@ -744,19 +757,29 @@ void recv_poll_req(poll_req_t req) {
   bool valid = verify_mac_and_own_term<poll_req_t>(&req, validate_flat_msg<poll_req_t>);
   if (valid)
     valid = verify_msg_term<poll_req_t, poll_rsp_t>(req, set_mac_flat_msg<poll_rsp_t>,send_poll_rsp);
-  if (!valid)
+	else
     return;
 
   if (self.role != FOLLOWER) { //only followers respons to poll requests
     return;
   }
   // follower_recv logic
-  bool valid_time = min_time_exceeded();
-	bool valid_poll_request = uids_equal(self.endorsement, empty_uid) && //// we have not voted yet AND
+  bool timeout = min_time_exceeded();
+	bool valid_poll_request =
 		!(self.last_entry().term > req.last_term || // NOT ( our term is higher OR
 			self.last_entry().term == req.last_term && // our term is same AND
 			self.last_entry().index > req.last_index) && //our INDEX is higher) AND
-			valid_time; // has timed out
+		timeout; // has timed out
+
+	if (!valid_poll_request) {
+		print("[WARN] <POLL_REQUEST> denied:");
+		if (!timeout)
+			print("  no timeout\n");
+		else if (self.last_entry().term > req.last_term)
+			print("  log mismatch (term)\n");
+		else if (self.last_entry().term == req.last_term && self.last_entry().index > req.last_index)
+			print("  log mismatch (index)\n");
+	}
 
   poll_rsp_t rsp = {
     req.source,   /*target*/
@@ -780,11 +803,11 @@ void recv_poll_rsp(poll_rsp_t rsp) {
 
   if (rsp.success)
     self.poll_votes++;
-  if (self.poll_votes > self.cluster_size / 2) {
-    start_election();
-  }
 
-	print((std::string("[INFO] Poll has ") + std::to_string(self.poll_votes) + "/" + std::to_string(self.cluster_size/2) + " votes\n").c_str());
+	printn("[INFO] Poll has " + std::to_string(self.poll_votes) + "/" + std::to_string(self.cluster_size/2 + 1) + " votes");
+
+	if (self.poll_votes > self.cluster_size / 2)
+    start_election();
 }
 
 void recv_election_req(election_req_t req) {
@@ -846,7 +869,7 @@ void recv_log_req(log_req_t req) {
 
   if (!uids_equal(self.id, req.target))
     return; //not intended recipient
-  
+
   log_rsp_t rsp;
   std::vector<entry_t> entries;
   if (self.role == LEADER) {
@@ -915,7 +938,7 @@ void recv_log_rsp(log_rsp_t rsp) {
     if (self.event_to_log_map[event.first].size() == 0) //not done
       return;
   }
-  
+
   //we're done -- create structure, and return to daemon
   std::vector<entry_t> flat_entry_list;
   std::vector<uid_t> event_id_list;
@@ -929,7 +952,7 @@ void recv_log_rsp(log_rsp_t rsp) {
     offset_list.push_back(event_to_log.second.size());
   }
 
-  return_logs(&flat_entry_list[0], flat_entry_list.size(),
+  return_history(&flat_entry_list[0], flat_entry_list.size(),
     &event_id_list[0], event_id_list.size(),
     &offset_list[0]);
 
@@ -940,9 +963,9 @@ void execute(uid_t event_id) {
   command_req_t exec_init = {
     self.leader_map[event_id], /* target */
     self.id, /* source */
-    command_tag_t { 
-      generate_random_uid(), 
-      LOCK 
+    command_tag_t {
+      generate_random_uid(),
+      LOCK
     },
     event_id,
     {0}
@@ -951,9 +974,10 @@ void execute(uid_t event_id) {
   send_command_req(exec_init);
 }
 
-void get_log() {
+void get_history() {
   std::vector<log_req_t> log_reqs;
   for each (std::pair<uid_t, dcr_event> event in self.workflow.event_store) {
+		printn("[DEBUG] " + to_string(event.first) + " -> " + to_string(self.leader_map[event.first]));
     self.event_to_log_map[event.first].clear();
     log_req_t req = {
       self.leader_map[event.first],

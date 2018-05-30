@@ -2,6 +2,8 @@
 #include <sgx_trts.h>
 #include "msg.h"
 
+const uid_t empty_uid = { 0 };
+
 struct cmp_uids {
   bool operator()(const uid_t& lhs, const uid_t& rhs) const {
     if (lhs.id1 == rhs.id1)

@@ -5,7 +5,7 @@
 // UNSAFE! Only for PoC. Should be provisioned by remote attestation with IAS.
 const sgx_cmac_128bit_key_t p_key = { 0x6b, 0x90, 0x12, 0x73, 0x0F, 0x3e, 0x18, 0xe5, 0x34, 0xa6, 0x26, 0x5, 0x3b, 0x6c, 0xA2, 0x1d };
 
-bool cmp_macs(sgx_cmac_128bit_tag_t mac_1, sgx_cmac_128bit_tag_t mac_2); 
+bool cmp_macs(sgx_cmac_128bit_tag_t mac_1, sgx_cmac_128bit_tag_t mac_2);
 
 template<typename T>
 sgx_status_t get_mac_list(T* list, uint32_t length, sgx_cmac_128bit_tag_t* tag) {

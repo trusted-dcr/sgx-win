@@ -92,73 +92,77 @@ grpc::Status daemon::SgxDaemonImpl::Config(grpc::ServerContext* context, const t
 	return grpc::Status::OK;
 }
 
+grpc::Status daemon::SgxDaemonImpl::Stop(grpc::ServerContext* context, const google::protobuf::Empty* request, google::protobuf::Empty* response) {
+	exit(0);
+}
+
 grpc::Status daemon::SgxDaemonImpl::Send(grpc::ServerContext* context, const tdcr::network::Container* cont, google::protobuf::Empty* response) {
 	switch (cont->type()) {
 	case tdcr::network::Container::COMMAND_REQUEST: {
-		std::cout << "[INFO] <COMMAND_REQUEST> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <COMMAND_REQUEST> from " << context->peer() << std::endl;
 		command_req_t req;
 		convert::unpack(*cont, req);
 		base->enclave.e_recv_command_req(req);
 		break;
 	}
 	case tdcr::network::Container::COMMAND_RESPONSE: {
-		std::cout << "[INFO] <COMMAND_RESPONSE> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <COMMAND_RESPONSE> from " << context->peer() << std::endl;
 		command_rsp_t rsp;
 		convert::unpack(*cont, rsp);
 		base->enclave.e_recv_command_rsp(rsp);
 		break;
 	}
 	case tdcr::network::Container::APPEND_REQUEST: {
-		std::cout << "[INFO] <APPEND_REQUEST> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <APPEND_REQUEST> from " << context->peer() << std::endl;
 		append_req_t req;
 		convert::unpack(*cont, req);
 		base->enclave.e_recv_append_req(req);
 		break;
 	}
 	case tdcr::network::Container::APPEND_RESPONSE: {
-		std::cout << "[INFO] <APPEND_RESPONSE> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <APPEND_RESPONSE> from " << context->peer() << std::endl;
 		append_rsp_t rsp;
 		convert::unpack(*cont, rsp);
 		base->enclave.e_recv_append_rsp(rsp);
 		break;
 	}
 	case tdcr::network::Container::POLL_REQUEST: {
-		std::cout << "[INFO] <POLL_REQUEST> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <POLL_REQUEST> from " << context->peer() << std::endl;
 		poll_req_t req;
 		convert::unpack(*cont, req);
 		base->enclave.e_recv_poll_req(req);
 		break;
 	}
 	case tdcr::network::Container::POLL_RESPONSE: {
-		std::cout << "[INFO] <POLL_RESPONSE> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <POLL_RESPONSE> from " << context->peer() << std::endl;
 		poll_rsp_t rsp;
 		convert::unpack(*cont, rsp);
 		base->enclave.e_recv_poll_rsp(rsp);
 		break;
 	}
 	case tdcr::network::Container::ELECTION_REQUEST: {
-		std::cout << "[INFO] <ELECTION_REQUEST> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <ELECTION_REQUEST> from " << context->peer() << std::endl;
 		election_req_t req;
 		convert::unpack(*cont, req);
 		base->enclave.e_recv_election_req(req);
 		break;
 	}
 	case tdcr::network::Container::ELECTION_RESPONSE: {
-		std::cout << "[INFO] <ELECTION_RESPONSE> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <ELECTION_RESPONSE> from " << context->peer() << std::endl;
 		election_rsp_t rsp;
 		convert::unpack(*cont, rsp);
 		base->enclave.e_recv_election_rsp(rsp);
 		break;
 	}
 	case tdcr::network::Container::LOG_REQUEST: {
-		std::cout << "[INFO] <LOG_REQUEST> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <LOG_REQUEST> from " << context->peer() << std::endl;
 		log_req_t req;
 		convert::unpack(*cont, req);
 		base->enclave.e_recv_log_req(req);
 		break;
 	}
 	case tdcr::network::Container::LOG_RESPONSE: {
-		std::cout << "[INFO] <LOG_RESPONSE> from " << context->peer() << std::endl;
+		std::cout << "[INFO] Received <LOG_RESPONSE> from " << context->peer() << std::endl;
 		log_rsp_t rsp;
 		convert::unpack(*cont, rsp);
 		base->enclave.e_recv_log_rsp(rsp);
@@ -170,6 +174,49 @@ grpc::Status daemon::SgxDaemonImpl::Send(grpc::ServerContext* context, const tdc
 	}
 
 	return grpc::Status::OK;
+}
+
+grpc::Status daemon::SgxDaemonImpl::Execute(grpc::ServerContext* context, const tdcr::network::Uid* event, google::protobuf::Empty* response) {
+	base->enclave.e_execute(convert::from_wire(*event));
+	return grpc::Status::OK;
+}
+
+grpc::Status daemon::SgxDaemonImpl::History(grpc::ServerContext* context, const google::protobuf::Empty* request, tdcr::sgxd::Snapshot* snapshot) {
+	if (base->history_in_progress)
+		return grpc::Status::CANCELLED;
+	base->history_in_progress = true;
+
+	// prompt enclave for history
+	base->enclave.e_get_history();
+
+	// spin to win
+	auto timeout = std::chrono::system_clock::now() + std::chrono::seconds(30);
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+		// return history to rpc client
+		if (base->history_ready) {
+			for each (auto cluster_pair in base->history) {
+				auto part = snapshot->add_parts();
+				part->set_allocated_cluster(new tdcr::network::Uid(convert::to_wire(cluster_pair.first)));
+				for each (auto cluster_entry in cluster_pair.second) {
+					auto entry = part->add_entries();
+					entry->CopyFrom(convert::to_wire(cluster_entry));
+				}
+			}
+
+			base->history_in_progress = false;
+			base->history_ready = false;
+			base->history.clear();
+			return grpc::Status::OK;
+		}
+
+		// timeout
+		if (std::chrono::system_clock::now() > timeout) {
+			base->history_in_progress = false;
+			return grpc::Status::CANCELLED;
+		}
+	}
 }
 
 daemon* daemon_instance;

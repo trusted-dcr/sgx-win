@@ -772,7 +772,7 @@ public:
       log_reqs.clear();
       log_rsps.clear();
 
-      eh.e_get_log();
+      eh.e_get_history();
 
       Assert::IsTrue(log_reqs.size() == 5);
 
@@ -833,7 +833,7 @@ public:
       log_reqs.clear();
       log_rsps.clear();
 
-      eh.e_get_log();
+      eh.e_get_history();
 
       Assert::IsTrue(log_reqs.size() == 5);
 
@@ -949,7 +949,7 @@ void send_log_rsp(log_rsp_t rsp, entry_t* entries, int size) {
   log_rsps.push_back(rsp);
 }
 
-void return_logs(entry_t* flat_entry_list, uint32_t entry_length,
+void return_history(entry_t* flat_entry_list, uint32_t entry_length,
   uid_t* event_uids, uint32_t id_length,
   uint32_t* offset_list) {
 

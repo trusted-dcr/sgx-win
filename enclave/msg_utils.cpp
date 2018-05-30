@@ -1,3 +1,4 @@
+#include <string>
 #include "msg.h"
 #include "msg_util.h"
 
@@ -21,8 +22,8 @@ uid_t generate_random_uid() {
   do {
     status = sgx_read_rand(rand1, 8);
     status = sgx_read_rand(rand2, 8);
-    id.id1 = (uint64_t)rand1;
-    id.id2 = (uint64_t)rand2;
+		memcpy(&id.id1, rand1, sizeof(uint64_t));
+		memcpy(&id.id2, rand2, sizeof(uint64_t));
   } while (status != SGX_SUCCESS);
   return id;
 }
@@ -33,7 +34,7 @@ entry_t get_empty_entry() {
     0, /* term */
     {0,0}, /* event */
     {0,0}, /* source */
-    {generate_random_uid(), CHECKPOINT }/* tag */
+    {empty_uid, CHECKPOINT }/* tag */
   };
   return entry;
 }
