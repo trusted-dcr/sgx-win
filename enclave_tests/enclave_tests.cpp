@@ -686,7 +686,7 @@ public:
       Assert::IsTrue(uids_equal(command_reqs[6].target, { 0,3 })); //test retry
       Assert::IsTrue(append_reqs.size() == 3);
     }
-  
+
     TEST_METHOD(get_log_map_size_test) {
       leader_lock_msg_exec_sequence_test(); //lots of executions
       command_reqs.clear();
@@ -897,6 +897,10 @@ void return_logs(entry_t* flat_entry_list, uint32_t entry_length,
     uid_t event = event_to_log.first;
     std::vector<entry_t> log = event_to_log.second;
   }
+}
+
+void print(const char* str) {
+
 }
 
 #endif // SGX_DEBUG

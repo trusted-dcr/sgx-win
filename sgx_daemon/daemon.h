@@ -40,5 +40,3 @@ public:
 private:
 	void async_send(tdcr::network::Container cont);
 };
-
-static daemon* daemon_instance;

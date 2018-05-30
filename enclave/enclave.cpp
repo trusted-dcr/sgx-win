@@ -10,15 +10,20 @@ bool verify_mac_and_own_term(T* msg, U validate_mac) {
   //validate mac
   bool is_valid_message = false;
   validate_mac(msg, is_valid_message);
-  if (!is_valid_message)
-    return false; //invalid mac
+	if (!is_valid_message) {
+		print("[WARN] Invalid MAC\n");
+		return false; //invalid mac
+	}
 
   //verify that we are the intended receiver
-  if (!uids_equal(msg->target, self.id))
+	if (!uids_equal(msg->target, self.id)) {
+		print("[WARN] Received message with wrong target\n");
     return false;
+	}
 
   //verify term
   if (msg->term > self.term) {
+		print("[WARN] Term overtaken -- converting to follower\n");
     self.update_term(msg->term, msg->source);
     self.locked_entry_index = -1;
     self.role = FOLLOWER;
@@ -30,6 +35,8 @@ bool verify_mac_and_own_term(T* msg, U validate_mac) {
 template<typename T, typename U, typename V, typename W>
 bool verify_msg_term(T msg, V mac, W send) {
   if (msg.term < self.term) {
+		print((std::string("[WARN] Sender term too low (") + std::to_string(msg.term) + "<" + std::to_string(self.term) + ")\n").c_str());
+
     U rsp = { 0 };
     rsp.source = self.id;
     rsp.target = msg.source;
@@ -744,28 +751,29 @@ void recv_poll_req(poll_req_t req) {
   }
   // follower_recv logic
   bool valid_time = min_time_exceeded();
+	bool valid_poll_request = uids_equal(self.endorsement, empty_uid) && //// we have not voted yet AND
+		!(self.last_entry().term > req.last_term || // NOT ( our term is higher OR
+			self.last_entry().term == req.last_term && // our term is same AND
+			self.last_entry().index > req.last_index) && //our INDEX is higher) AND
+			valid_time; // has timed out
 
   poll_rsp_t rsp = {
     req.source,   /*target*/
     self.id,      /*source*/
     self.term,    /*term*/
-    (uids_equal(self.endorsement, empty_uid) && // we have not voted yet AND
-    (self.last_entry().term < req.last_term || // ( their term is higher OR
-    self.last_entry().term == req.last_term && // their term is same AND
-    self.last_entry().index <= req.last_index) && //their INDEX is higher) AND
-    valid_time),  /*success*/                 // timed out (min time)
+    valid_poll_request,  /*success*/
     {0}           /*mac*/
   };
   mac_and_send_msg<poll_rsp_t>(rsp, set_mac_flat_msg<poll_rsp_t>, send_poll_rsp);
 }
 
 void recv_poll_rsp(poll_rsp_t rsp) {
-  bool valid = verify_mac_and_own_term<poll_rsp_t>(&rsp, validate_flat_msg<poll_rsp_t>);
+	bool valid = verify_mac_and_own_term<poll_rsp_t>(&rsp, validate_flat_msg<poll_rsp_t>);
   if (!valid)
     return;
 
-
   if (self.role != FOLLOWER) { //only followers handles poll responses
+		print("[WARN] Received <POLL_REQUEST> as non-follower\n");
     return;
   }
 
@@ -774,6 +782,8 @@ void recv_poll_rsp(poll_rsp_t rsp) {
   if (self.poll_votes > self.cluster_size / 2) {
     start_election();
   }
+
+	print((std::string("[INFO] Poll has ") + std::to_string(self.poll_votes) + "/" + std::to_string(self.cluster_size/2) + " votes\n").c_str());
 }
 
 void recv_election_req(election_req_t req) {

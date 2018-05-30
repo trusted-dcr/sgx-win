@@ -86,5 +86,7 @@ enclave {
         void return_logs([in, count=entry_length] entry_t* flat_entry_list, uint32_t entry_length,
 						  [in, count=id_length]uid_t* event_uids, uint32_t id_length,
 						  [in, count=id_length]uint32_t* offset_list);
+
+		void print([in, string] const char* str);
     };
 };

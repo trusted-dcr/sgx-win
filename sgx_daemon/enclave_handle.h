@@ -2,6 +2,7 @@
 #include <tchar.h>
 #include <map>
 #include <chrono>
+#include <mutex>
 #include "sgx_urts.h"
 #include "enclave_u.h"
 #include "dcr.h"
@@ -11,6 +12,7 @@
 class enclave_handle {
 public:
 	sgx_enclave_id_t eid;
+	std::mutex mtx;
 
 	sgx_status_t init_enclave() {
 		sgx_launch_token_t token;
@@ -24,53 +26,95 @@ public:
   }
 
 	sgx_status_t e_recv_command_req(command_req_t req) {
-		return recv_command_req(eid, req);
+    mtx.lock();
+		sgx_status_t status = recv_command_req(eid, req);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_command_rsp(command_rsp_t rsp) {
-		return recv_command_rsp(eid, rsp);
+    mtx.lock();
+		sgx_status_t status = recv_command_rsp(eid, rsp);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_append_req(append_req_t req) {
-		return recv_append_req(eid, req);
+    mtx.lock();
+		sgx_status_t status = recv_append_req(eid, req);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_append_rsp(append_rsp_t rsp) {
-		return recv_append_rsp(eid, rsp);
+    mtx.lock();
+		sgx_status_t status = recv_append_rsp(eid, rsp);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_poll_req(poll_req_t req) {
-		return recv_poll_req(eid, req);
+    mtx.lock();
+		sgx_status_t status = recv_poll_req(eid, req);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_poll_rsp(poll_rsp_t rsp) {
-		return recv_poll_rsp(eid, rsp);
+    mtx.lock();
+		sgx_status_t status = recv_poll_rsp(eid, rsp);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_election_req(election_req_t req) {
-		return recv_election_req(eid, req);
+    mtx.lock();
+		sgx_status_t status = recv_election_req(eid, req);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_election_rsp(election_rsp_t rsp) {
-		return recv_election_rsp(eid, rsp);
+    mtx.lock();
+		sgx_status_t status = recv_election_rsp(eid, rsp);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_log_req(log_req_t req) {
-		return recv_log_req(eid, req);
+    mtx.lock();
+		sgx_status_t status = recv_log_req(eid, req);
+    mtx.unlock();
+    return status;
 	}
 
 	sgx_status_t e_recv_log_rsp(log_rsp_t rsp) {
-		return recv_log_rsp(eid, rsp);
+    mtx.lock();
+		sgx_status_t status = recv_log_rsp(eid, rsp);
+    mtx.unlock();
+    return status;
 	}
 
   sgx_status_t e_set_time() {
-    uint64_t ticks = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    return set_time(eid, ticks);
-  }
+		mtx.lock();
+		uint64_t ticks = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    sgx_status_t status = set_time(eid, ticks);
+		mtx.unlock();
+    return status;
+	}
 
-  sgx_status_t e_get_log() {
-    return get_log(eid);
-  }
+	sgx_status_t e_execute(uid_t event) {
+    mtx.lock();
+		sgx_status_t status = execute(eid, event);
+    mtx.unlock();
+    return status;
+	}
+	sgx_status_t e_get_log() {
+    mtx.lock();
+		sgx_status_t status = get_log(eid);
+    mtx.unlock();
+    return status;
+	}
 
   void flatten_map(std::map<uid_t, uid_t, cmp_uids> in_map, uid_t* peers_list, uid_t* events_list) {
     std::vector<uid_t> peers;

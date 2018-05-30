@@ -28,6 +28,14 @@ void daemon::start_daemon() {
 	std::cout << "[INFO] Starting enclave" << std::endl;
 	enclave.init_enclave();
 
+	// start timer thread
+	std::thread first([&]() {
+		while (true) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			enclave.e_set_time();
+		}
+	});
+
 	// start gRPC
 	rpc->init(this);
 	grpc::ServerBuilder builder;
@@ -39,13 +47,14 @@ void daemon::start_daemon() {
 }
 
 void daemon::async_send(tdcr::network::Container cont) {
-	uid_t target = convert::from_wire(cont.target());
-	std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(addrs[target], grpc::InsecureChannelCredentials());
-	std::unique_ptr<tdcr::sgxd::SgxDaemon::Stub> stub = tdcr::sgxd::SgxDaemon::NewStub(channel);
-
-	grpc::ClientContext context;
-	grpc::CompletionQueue queue;
-	stub->AsyncSend(&context, cont, &queue);
+	std::thread([this, cont]() {
+		uid_t target = convert::from_wire(cont.target());
+		std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(addrs[target], grpc::InsecureChannelCredentials());
+		std::unique_ptr<tdcr::sgxd::SgxDaemon::Stub> stub = tdcr::sgxd::SgxDaemon::NewStub(channel);
+		grpc::ClientContext context;
+		google::protobuf::Empty response;
+		stub->Send(&context, cont, &response);
+	}).detach();
 }
 
 /* SgxDaemonImpl */
@@ -162,6 +171,8 @@ grpc::Status daemon::SgxDaemonImpl::Send(grpc::ServerContext* context, const tdc
 
 	return grpc::Status::OK;
 }
+
+daemon* daemon_instance;
 
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
