@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <sgx_tcrypto.h>
-
+#pragma pack(push,1)
 typedef struct uid_t {
   uint64_t id1;
   uint64_t id2;
@@ -127,3 +127,4 @@ typedef struct log_rsp_t {
 	uint32_t entries_n;
 	sgx_cmac_128bit_tag_t mac;
 } log_rsp_t;
+#pragma pack(pop)

@@ -21,7 +21,8 @@ template<typename T>
 sgx_status_t get_mac_flattened(T* msg, sgx_cmac_128bit_tag_t* tag) {
   uint8_t zero[16] = { 0 };
   memcpy(tag, zero, SGX_CMAC_MAC_SIZE);
-  sgx_status_t ret = sgx_rijndael128_cmac_msg(&p_key, (uint8_t*)msg, (uint64_t)msg->mac - (uint64_t)msg, tag); //WHY 4????!?!?!?!
+  uint64_t size = (uint64_t)msg->mac - (uint64_t)msg;
+  sgx_status_t ret = sgx_rijndael128_cmac_msg(&p_key, (uint8_t*)msg, size, tag);
   return ret;
 }
 

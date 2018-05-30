@@ -337,7 +337,7 @@ public:
   enclave_handle eh;
 
     TEST_METHOD_INITIALIZE(setup) {
-      eh.init_enclave();
+      sgx_status_t stat = eh.init_enclave();
     }
 
     TEST_METHOD_CLEANUP(teardown) {
@@ -457,8 +457,64 @@ public:
 
       Assert::IsTrue(append_reqs.size() == 1);
       append_req_t append1 = append_reqs[0];
-      append_req_t append2 = eh.e_test_set_mac_append_req(append_reqs[0]);
+      append_req_t append2 = {
+        append1.target,
+        append1.source,
+        append1.term,
+        append1.prev_term,
+        append1.prev_index,
+        append1.commit_index,
+        append1.entries,
+        append1.entries_n,
+        {0}
+      };
+      append2 = eh.e_test_set_mac_append_req(append2);
       int cmp = memcmp(append1.mac, append2.mac, SGX_CMAC_MAC_SIZE);
+      Assert::IsTrue(cmp == 0);
+    }
+
+    TEST_METHOD(test_append_rsp_mac) {
+      dcr_workflow wf = wf_DU_DE();
+      std::map<uid_t, uid_t, cmp_uids> peer_map = ten_peers_two_peer_per_event_peer_map();
+      eh.e_configure_enclave({ 0,1 }, wf, peer_map);
+
+      append_req_t req1 = empty_append_req({ 0,1 }, { 0,2 });
+      entry_t exec_entry = {
+        1,
+        1,
+        { 0,1 }, //event
+        { 0,2 }, //source
+        { { 1,1 }, EXEC }
+      };
+      req1.entries = &exec_entry;
+      req1.entries_n = 1;
+      req1.commit_index = 0;
+      req1.prev_index = 0;
+      req1.prev_term = 0;
+      req1.term = 1; //will make us ({0,2}) leader
+      req1 = eh.e_test_set_mac_append_req(req1);
+      eh.e_recv_append_req(req1);
+      sizeof(bool);
+      Assert::IsTrue(append_rsps.size() == 1);
+      append_rsp_t rsp1 = append_rsps[0];
+      append_rsp_t rsp2 = {
+        rsp1.target,
+        rsp1.source,
+        rsp1.term,
+        rsp1.prev_term,
+        rsp1.prev_index,
+        rsp1.success,
+        rsp1.last_index,
+        {0}
+      };
+
+      uint8_t byte_array[52];
+      uint8_t* msg_as_array = (uint8_t*)&rsp2;
+      for (int i = 0; i < 52; i++) {
+        byte_array[i] = (uint8_t)msg_as_array[i];
+      }
+      rsp2 = eh.e_test_set_mac_append_rsp(rsp2);
+      int cmp = memcmp(rsp1.mac, rsp2.mac, SGX_CMAC_MAC_SIZE);
       Assert::IsTrue(cmp == 0);
 
     }
