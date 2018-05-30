@@ -3,6 +3,8 @@
 #include "enclave_helpers.h"
 #include "print_util.h"
 
+void update_commit_index(uint32_t new_index);
+
 peer self;
 
 //helper functions
@@ -169,6 +171,10 @@ void start_election() {
 
 void append_to_log(entry_t entry) {
   self.log.push_back(entry);
+	if (self.cluster_size == 1) {
+		update_commit_index(self.log.size()-1);
+		return;
+	}
 
   std::vector<append_req_t> appends;
   for each (uid_t member in self.cluster_members) {
@@ -889,6 +895,7 @@ void recv_log_req(log_req_t req) {
     };
   }
   else {
+		printn("[WARN] Got <LOG_REQUEST> but not leader");
     entries.push_back(get_empty_entry()); //to prevent nullptr
     rsp = {
       req.source, /* target */
@@ -1069,7 +1076,9 @@ void configure_enclave(
   self.cluster_size = self.cluster_members.size();
   self.locked_entry_index = -1;
 
-  self.update_term(0, uid_t { 0, 0 }); //(initial leader?)
+  self.update_term(0, self.leader_map[self.cluster_event]);
+	if (self.cluster_size == 1)
+		become_leader();
 }
 
 #ifdef SGX_DEBUG
