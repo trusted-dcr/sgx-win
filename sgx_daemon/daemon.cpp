@@ -53,7 +53,12 @@ void daemon::async_send(tdcr::network::Container cont) {
 		std::unique_ptr<tdcr::sgxd::SgxDaemon::Stub> stub = tdcr::sgxd::SgxDaemon::NewStub(channel);
 		grpc::ClientContext context;
 		google::protobuf::Empty response;
-		stub->Send(&context, cont, &response);
+		grpc::Status status = stub->Send(&context, cont, &response);
+		if (!status.ok())
+			std::cout << "[ERR] General gRPC send error" << std::endl
+								<< "  addr: " << addrs[target] << std::endl
+								<< "  msg:  " << status.error_message() << std::endl
+								<< "  code: " << status.error_code() << std::endl;
 	}).detach();
 }
 
