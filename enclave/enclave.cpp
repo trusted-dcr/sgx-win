@@ -184,8 +184,8 @@ void append_to_log(entry_t entry) {
       member,                   /* target */
       self.id,                  /* source */
       self.term,                /* term */
-      self.last_entry().term,   /* prev_term */
-      self.last_entry().index,  /* prev_index */
+      self.log[self.log.size() - 2].term,   /* prev_term */
+      self.log[self.log.size() - 2].index,  /* prev_index */
       self.get_commit_index(),  /* commit_index */
       &self.last_entry(),                   /* entries */
       1,                        /* entries_n */
