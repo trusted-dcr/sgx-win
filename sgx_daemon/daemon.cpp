@@ -93,6 +93,7 @@ grpc::Status daemon::SgxDaemonImpl::Config(grpc::ServerContext* context, const t
 }
 
 grpc::Status daemon::SgxDaemonImpl::Stop(grpc::ServerContext* context, const google::protobuf::Empty* request, google::protobuf::Empty* response) {
+  base->enclave.destroy_enclave();
 	exit(0);
 }
 

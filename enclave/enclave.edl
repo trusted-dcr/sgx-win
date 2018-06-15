@@ -1,4 +1,4 @@
-#define SGX_DEBUG
+
 enclave {
     include "msg.h"
 

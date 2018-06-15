@@ -36,6 +36,7 @@
   </ItemGroup>
   <PropertyGroup>
     <VcpkgConfiguration Condition="'$(Configuration)' == 'Simulation'">Debug</VcpkgConfiguration>
+    <VcpkgConfiguration Condition="'$(Configuration)' == 'Prerelease'">Release</VcpkgConfiguration>
   </PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81A7CA81-BF0A-4132-A726-05A20BCD4CBC}</ProjectGuid>
