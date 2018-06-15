@@ -10,10 +10,10 @@
 
 enum role_t { FOLLOWER, CANDIDATE, LEADER };
 
-const uint64_t delta_heartbeat = 5000;
+const uint64_t delta_heartbeat = 100;
 const uint64_t delta_min_time = 2*delta_heartbeat;
-const uint64_t delta_max_time = 16*delta_heartbeat;
-const uint64_t delta_lock_time = 50 * delta_heartbeat;
+const uint64_t delta_max_time = 4*delta_heartbeat;
+const uint64_t delta_lock_time = 5 * delta_heartbeat;
 
 class peer {
   uint32_t commit_index;
