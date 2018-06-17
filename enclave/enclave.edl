@@ -83,9 +83,7 @@ enclave {
         void send_log_req(log_req_t req);
         void send_log_rsp(log_rsp_t rsp, [in, count=size] entry_t* entries, int size);
 
-        void return_history([in, count=entry_length] entry_t* flat_entry_list, uint32_t entry_length,
-						  [in, count=id_length]uid_t* event_uids, uint32_t id_length,
-						  [in, count=id_length]uint32_t* offset_list);
+        void return_history([in, count=size] entry_t* entries, uint32_t size, uid_t cluster);
 
 		void print([in, string] const char* str);
     };

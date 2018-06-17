@@ -934,36 +934,7 @@ void recv_log_rsp(log_rsp_t rsp) {
     return;
   }
 
-  self.event_to_log_map[event_id].clear();
-
-  for (int i = 0; i < rsp.entries_n; i++) {
-    self.event_to_log_map[event_id].push_back(rsp.entries[i]);
-  }
-
-  //check if we´re done
-  for each (std::pair<uid_t, dcr_event> event in self.workflow.event_store) {
-    if (self.event_to_log_map[event.first].size() == 0) //not done
-      return;
-  }
-
-  //we're done -- create structure, and return to daemon
-  std::vector<entry_t> flat_entry_list;
-  std::vector<uid_t> event_id_list;
-  std::vector<uint32_t> offset_list;
-
-  for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in self.event_to_log_map) {
-    for each (entry_t entry in event_to_log.second) {
-      flat_entry_list.push_back(entry);
-    }
-    event_id_list.push_back(event_to_log.first);
-    offset_list.push_back(event_to_log.second.size());
-  }
-
-  return_history(&flat_entry_list[0], flat_entry_list.size(),
-    &event_id_list[0], event_id_list.size(),
-    &offset_list[0]);
-
-  self.event_to_log_map.clear();
+  return_history(rsp.entries, rsp.entries_n, event_id);
 }
 
 void execute(uid_t event_id) {

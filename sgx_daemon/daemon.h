@@ -37,6 +37,8 @@ public:
 	std::map<uid_t, std::string, cmp_uids> addrs;
 	unsigned short port;
 
+	int wf_size;
+
 	bool history_in_progress = false;
 	bool history_ready = false;
 	std::map<uid_t, std::vector<entry_t>, cmp_uids> history;

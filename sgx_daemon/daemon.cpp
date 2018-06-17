@@ -68,6 +68,7 @@ grpc::Status daemon::SgxDaemonImpl::Config(grpc::ServerContext* context, const t
 	uid_t self = convert::from_wire(conf->self());
 	dcr_workflow wf = convert::from_wire(conf->workflow());
 	std::map<uid_t, uid_t, cmp_uids> peer_to_event;
+	base->wf_size = conf->workflow().events_size();
 
 	for each (tdcr::sgxd::SgxConfig::Peer peer in conf->peers()) {
 		uid_t peer_uid = convert::from_wire(peer.uid());
@@ -85,7 +86,7 @@ grpc::Status daemon::SgxDaemonImpl::Config(grpc::ServerContext* context, const t
 	std::cout << "[INFO] Received config from " << context->peer() << std::endl;
 	std::cout << "  own uid: " << self << std::endl;
 	std::cout << "  cluster: " << peer_to_event[self] << std::endl;
-	std::cout << "  workflow size: " << conf->workflow().events_size() << std::endl;
+	std::cout << "  workflow size: " << base->wf_size << std::endl;
 
 	std::cout << "  routes:" << std::endl;
 	for each (std::pair<uid_t, std::string> kv in base->addrs)
@@ -195,33 +196,27 @@ grpc::Status daemon::SgxDaemonImpl::History(grpc::ServerContext* context, const 
 	base->enclave.e_get_history();
 
 	// spin to win
-	auto timeout = std::chrono::system_clock::now() + std::chrono::seconds(30);
+	auto timeout = std::chrono::system_clock::now() + std::chrono::seconds(5);
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		if (base->history_ready || std::chrono::system_clock::now() > timeout)
+			break;
+	}
 
-		// return history to rpc client
-		if (base->history_ready) {
-			for each (auto cluster_pair in base->history) {
-				auto part = snapshot->add_parts();
-				part->set_allocated_cluster(new tdcr::network::Uid(convert::to_wire(cluster_pair.first)));
-				for each (auto cluster_entry in cluster_pair.second) {
-					auto entry = part->add_entries();
-					entry->CopyFrom(convert::to_wire(cluster_entry));
-				}
-			}
-
-			base->history_in_progress = false;
-			base->history_ready = false;
-			base->history.clear();
-			return grpc::Status::OK;
-		}
-
-		// timeout
-		if (std::chrono::system_clock::now() > timeout) {
-			base->history_in_progress = false;
-			return grpc::Status::CANCELLED;
+	// return history to rpc client
+	for each (auto cluster_pair in base->history) {
+		auto part = snapshot->add_parts();
+		part->set_allocated_cluster(new tdcr::network::Uid(convert::to_wire(cluster_pair.first)));
+		for each (auto cluster_entry in cluster_pair.second) {
+			auto entry = part->add_entries();
+			entry->CopyFrom(convert::to_wire(cluster_entry));
 		}
 	}
+
+	base->history_in_progress = false;
+	base->history_ready = false;
+	base->history.clear();
+	return grpc::Status::OK;
 }
 
 daemon* daemon_instance;

@@ -69,27 +69,15 @@ void print(const char* str) {
 	std::cout << str;
 }
 
-void return_history(entry_t* flat_entry_list, uint32_t entry_length,
-  uid_t* event_uids, uint32_t id_length,
-  uint32_t* offset_list) {
-  std::map<uid_t, std::vector<entry_t>, cmp_uids> cluster_to_log_map;
+void return_history(entry_t* entries, uint32_t size, uid_t cluster) {
+	// timed out
+	if (!daemon_instance->history_in_progress)
+		return;
+	
+	for (size_t i = 0; i < size; i++)
+		daemon_instance->history[cluster].push_back(entries[i]);
 
-  uint32_t acc = 0;
-  uint32_t j = 0;
-  for (uint32_t i = 0; i < id_length; i++) {
-    for (j = 0; j < offset_list[i]; j++) {
-      uid_t event_id = event_uids[i];
-      entry_t entry = flat_entry_list[acc + j];
-      if (cluster_to_log_map.find(event_id) == cluster_to_log_map.end())
-				cluster_to_log_map[event_id] = std::vector<entry_t>();
-			cluster_to_log_map[event_id].push_back(entry);
-    }
-    acc = acc + j;
-  }
-
-	// if daemon has not timed out yet
-	if (daemon_instance->history_in_progress) {
-		daemon_instance->history = cluster_to_log_map;
+	// if we get answers from all clusters, we can stop early
+	if (daemon_instance->history.size() == daemon_instance->wf_size)
 		daemon_instance->history_ready = true;
-	}
 }

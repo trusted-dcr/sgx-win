@@ -949,26 +949,9 @@ void send_log_rsp(log_rsp_t rsp, entry_t* entries, int size) {
   log_rsps.push_back(rsp);
 }
 
-void return_history(entry_t* flat_entry_list, uint32_t entry_length,
-  uid_t* event_uids, uint32_t id_length,
-  uint32_t* offset_list) {
-
-  uint32_t acc = 0;
-  uint32_t j = 0;
-  for (uint32_t i = 0; i < id_length; i++) {
-    for (j = 0; j < offset_list[i]; j++) {
-      uid_t event_id = event_uids[i];
-      entry_t entry = flat_entry_list[acc + j];
-      if (event_to_log_map.find(event_id) == event_to_log_map.end())
-        event_to_log_map[event_id] = std::vector<entry_t>();
-      event_to_log_map[event_id].push_back(entry);
-    }
-    acc = acc + j;
-  }
-  for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
-    uid_t event = event_to_log.first;
-    std::vector<entry_t> log = event_to_log.second;
-  }
+void return_history(entry_t* entries, uint32_t size, uid_t cluster) {
+	for (size_t i = 0; i < size; i++)
+		event_to_log_map[cluster].push_back(entries[i]);
 }
 
 void print(const char* str) {

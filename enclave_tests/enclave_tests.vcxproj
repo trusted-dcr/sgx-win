@@ -36,6 +36,7 @@
   </ItemGroup>
   <PropertyGroup>
     <VcpkgConfiguration Condition="'$(Configuration)' == 'Simulation'">Debug</VcpkgConfiguration>
+    <VcpkgConfiguration Condition="'$(Configuration)' == 'Prerelease'">Release</VcpkgConfiguration>
   </PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6847AEF6-95CF-4E6A-BD4E-F578B61870F4}</ProjectGuid>
@@ -283,7 +284,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(SGXSDKInstallPath)\include;$(VCInstallDir)UnitTest\include;..\enclave;..\sgx_daemon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>EDEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SGX_DEBUG;EDEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link>
