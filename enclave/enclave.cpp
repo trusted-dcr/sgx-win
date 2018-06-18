@@ -170,6 +170,7 @@ void start_election() {
 }
 
 void append_to_log(entry_t entry) {
+	printn("[INFO] Starting append of " + to_string(entry));
   self.log.push_back(entry);
 	if (self.cluster_size == 1) {
 		update_commit_index(self.log.size()-1);
@@ -543,8 +544,12 @@ void recv_command_req(command_req_t req) {
 
         return;
       }
+      // if lock set is 0, we can immediately execute
+      if (self.workflow.get_lock_set(req.event).size() == 0)
+        req.tag.type = EXEC;
     }
   }
+
 
   // all other cases is simply an append to the log
   // entry to be appended in log
@@ -881,6 +886,7 @@ void recv_log_req(log_req_t req) {
   if (self.role == LEADER) {
     for (uint32_t i = 0; i < self.get_commit_index()+1; i++) {
       entries.push_back(self.log[i]);
+      printn("[DEBUG] " + to_string(self.log[i]));
     }
     entry_t* entries_list = new entry_t[entries.size()];
     std::copy(entries.begin(), entries.end(), entries_list);
