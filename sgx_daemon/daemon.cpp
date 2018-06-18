@@ -112,9 +112,9 @@ grpc::Status daemon::SgxDaemonImpl::Send(grpc::ServerContext* context, const tdc
 		break;
 	}
 	case tdcr::network::Container::COMMAND_RESPONSE: {
-		std::cout << "[INFO] Received <COMMAND_RESPONSE> from " << context->peer() << std::endl;
 		command_rsp_t rsp;
 		convert::unpack(*cont, rsp);
+    std::cout << "[INFO] Received <COMMAND_RESPONSE> with TAG " << rsp.tag.type << " from " << context->peer() << std::endl;
 		base->enclave.e_recv_command_rsp(rsp);
 		break;
 	}

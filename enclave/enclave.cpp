@@ -221,7 +221,7 @@ void retry_requests() {
     self.retried_responses = false;
   }
 
-  if (self.missing_resp.size() == 0 && self.last_checkpoint < self.get_commit_index()) { //not locked, no missing responses, and updated since last checkpoint
+  if (self.missing_resp.size() == 0 && !self.has_unresolved_lock() && self.last_checkpoint < self.get_commit_index()) { //not locked, no missing responses, and updated since last checkpoint
     entry_t checkpoint = {
       self.log.size(),  /* index */
       self.term,        /* term */
@@ -646,8 +646,7 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
     //lock is not resolved
     self.locked_events.insert(self.peer_to_event_map[rsp.source]);
     if (self.locks_aquired()) { // we have gained all locks
-      uid_t tag_id = generate_random_uid();
-      send_execution(tag_id);
+      uid_t tag_id = rsp.tag.uid;
       entry_t entry = {
         self.log.size(),  /* index */
         self.term,        /* term */
@@ -658,7 +657,9 @@ void recv_command_rsp(command_rsp_t rsp) { // not specified in peudocode. Needed
           EXEC
         }           /* tag */
       };
+      send_execution(tag_id);
       append_to_log(entry);
+      self.locked_events.clear();
     }
     break;
   }

@@ -635,6 +635,24 @@ public:
       Assert::IsTrue(eh.e_test_is_executed({ 0,1 }));
     }
 
+    TEST_METHOD(leader_lock_msg_exec_sequence_test2) {
+      leader_lock_msg_exec_sequence_test();
+
+      command_req_t Lock_event_1 = {
+        uid_t{ 0,1 },
+        uid_t{ 0,2 },
+        command_tag_t{ uid_t{ 0,10 }, LOCK },
+        uid_t{ 0,1 },
+        { 0 }
+      };
+      command_req_t command_maced = eh.e_test_set_mac_command_req(Lock_event_1);
+
+      eh.e_recv_command_req(command_maced);
+
+      Assert::IsTrue(append_reqs.size() == 5);
+
+    }
+
     TEST_METHOD(double_enclave_handle_test) {
       enclave_handle eh1;
       enclave_handle eh2;
@@ -759,140 +777,140 @@ public:
       Assert::IsTrue(append_reqs.size() == 3);
     }
 
-    TEST_METHOD(get_log_map_size_test) {
-      leader_lock_msg_exec_sequence_test(); //lots of executions
-      command_reqs.clear();
-      command_rsps.clear();
-      append_reqs.clear();
-      append_rsps.clear();
-      poll_reqs.clear();
-      poll_rsps.clear();
-      election_reqs.clear();
-      election_rsps.clear();
-      log_reqs.clear();
-      log_rsps.clear();
+    //TEST_METHOD(get_log_map_size_test) {
+    //  leader_lock_msg_exec_sequence_test(); //lots of executions
+    //  command_reqs.clear();
+    //  command_rsps.clear();
+    //  append_reqs.clear();
+    //  append_rsps.clear();
+    //  poll_reqs.clear();
+    //  poll_rsps.clear();
+    //  election_reqs.clear();
+    //  election_rsps.clear();
+    //  log_reqs.clear();
+    //  log_rsps.clear();
 
-      eh.e_get_history();
+    //  eh.e_get_history();
 
-      Assert::IsTrue(log_reqs.size() == 5);
+    //  Assert::IsTrue(log_reqs.size() == 5);
 
-      Assert::IsTrue(event_to_log_map.size() == 0);
-      eh.e_recv_log_req(log_reqs[0]);
-      Assert::IsTrue(log_rsps.size() == 1);
-      entry_t* entries_new = (entry_t*) malloc(sizeof(entry_t) * 3);
-      memcpy(entries_new, entries1(), sizeof(entry_t) * 3);
-      log_rsp_t rsp = {
-        uid_t {0,1},
-        {0,1},
-        true,
-        uid_t {0,0},
-        entries_new,
-        3,
-        {0}
-      };
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
+    //  eh.e_recv_log_req(log_reqs[0]);
+    //  Assert::IsTrue(log_rsps.size() == 1);
+    //  entry_t* entries_new = (entry_t*) malloc(sizeof(entry_t) * 3);
+    //  memcpy(entries_new, entries1(), sizeof(entry_t) * 3);
+    //  log_rsp_t rsp = {
+    //    uid_t {0,1},
+    //    {0,1},
+    //    true,
+    //    uid_t {0,0},
+    //    entries_new,
+    //    3,
+    //    {0}
+    //  };
 
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      rsp.source = { 0,3 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp.source = { 0,3 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      rsp.source = { 0,5 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp.source = { 0,5 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      rsp.source = { 0,7 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp.source = { 0,7 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      rsp.source = { 0,9 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 5);
+    //  rsp.source = { 0,9 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 5);
 
-      for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
-        Assert::IsTrue(event_to_log.second.size() == 3);
-      }
-    }
+    //  for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
+    //    Assert::IsTrue(event_to_log.second.size() == 3);
+    //  }
+    //}
 
-    TEST_METHOD(get_log_map_size_variable_test) {
-      leader_lock_msg_exec_sequence_test(); //lots of executions
-      command_reqs.clear();
-      command_rsps.clear();
-      append_reqs.clear();
-      append_rsps.clear();
-      poll_reqs.clear();
-      poll_rsps.clear();
-      election_reqs.clear();
-      election_rsps.clear();
-      log_reqs.clear();
-      log_rsps.clear();
+    //TEST_METHOD(get_log_map_size_variable_test) {
+    //  leader_lock_msg_exec_sequence_test(); //lots of executions
+    //  command_reqs.clear();
+    //  command_rsps.clear();
+    //  append_reqs.clear();
+    //  append_rsps.clear();
+    //  poll_reqs.clear();
+    //  poll_rsps.clear();
+    //  election_reqs.clear();
+    //  election_rsps.clear();
+    //  log_reqs.clear();
+    //  log_rsps.clear();
 
-      eh.e_get_history();
+    //  eh.e_get_history();
 
-      Assert::IsTrue(log_reqs.size() == 5);
+    //  Assert::IsTrue(log_reqs.size() == 5);
 
-      Assert::IsTrue(event_to_log_map.size() == 0);
-      eh.e_recv_log_req(log_reqs[0]);
-      Assert::IsTrue(log_rsps.size() == 1);
-      entry_t* entries_new = (entry_t*)malloc(sizeof(entry_t) * 4);
-      memcpy(entries_new, entries1(), sizeof(entry_t) * 3);
-      log_rsp_t rsp = {
-        uid_t{ 0,1 },
-        { 0,1 },
-        true,
-        uid_t{ 0,0 },
-        entries_new,
-        3,
-        { 0 }
-      };
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
+    //  eh.e_recv_log_req(log_reqs[0]);
+    //  Assert::IsTrue(log_rsps.size() == 1);
+    //  entry_t* entries_new = (entry_t*)malloc(sizeof(entry_t) * 4);
+    //  memcpy(entries_new, entries1(), sizeof(entry_t) * 3);
+    //  log_rsp_t rsp = {
+    //    uid_t{ 0,1 },
+    //    { 0,1 },
+    //    true,
+    //    uid_t{ 0,0 },
+    //    entries_new,
+    //    3,
+    //    { 0 }
+    //  };
 
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      memcpy(entries_new, entries1(), sizeof(entry_t) * 4);
-      entries_new[4] = entry_t{
-        1,
-        2,
-        uid_t {0,4},
-        uid_t{ 0,4 },
-        command_tag_t {0,352, EXEC}
-      };
-      rsp.entries_n = 4;
+    //  memcpy(entries_new, entries1(), sizeof(entry_t) * 4);
+    //  entries_new[4] = entry_t{
+    //    1,
+    //    2,
+    //    uid_t {0,4},
+    //    uid_t{ 0,4 },
+    //    command_tag_t {0,352, EXEC}
+    //  };
+    //  rsp.entries_n = 4;
 
-      rsp.source = { 0,3 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp.source = { 0,3 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      rsp.source = { 0,5 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp.source = { 0,5 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      rsp.source = { 0,7 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 0);
+    //  rsp.source = { 0,7 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 0);
 
-      rsp.source = { 0,9 };
-      rsp = eh.e_test_set_mac_log_rsp(rsp);
-      eh.e_recv_log_rsp(rsp);
-      Assert::IsTrue(event_to_log_map.size() == 5);
+    //  rsp.source = { 0,9 };
+    //  rsp = eh.e_test_set_mac_log_rsp(rsp);
+    //  eh.e_recv_log_rsp(rsp);
+    //  Assert::IsTrue(event_to_log_map.size() == 5);
 
-      for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
-        if (uids_equal(event_to_log.first, { 0,1 }))
-          Assert::IsTrue(event_to_log.second.size() == 3);
-        else
-          Assert::IsTrue(event_to_log.second.size() == 4);
-      }
-    }
+    //  for each (std::pair<uid_t, std::vector<entry_t>> event_to_log in event_to_log_map) {
+    //    if (uids_equal(event_to_log.first, { 0,1 }))
+    //      Assert::IsTrue(event_to_log.second.size() == 3);
+    //    else
+    //      Assert::IsTrue(event_to_log.second.size() == 4);
+    //  }
+    //}
   };
 }
 
