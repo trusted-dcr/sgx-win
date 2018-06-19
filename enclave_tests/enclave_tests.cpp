@@ -635,24 +635,6 @@ public:
       Assert::IsTrue(eh.e_test_is_executed({ 0,1 }));
     }
 
-    TEST_METHOD(leader_lock_msg_exec_sequence_test2) {
-      leader_lock_msg_exec_sequence_test();
-
-      command_req_t Lock_event_1 = {
-        uid_t{ 0,1 },
-        uid_t{ 0,2 },
-        command_tag_t{ uid_t{ 0,10 }, LOCK },
-        uid_t{ 0,1 },
-        { 0 }
-      };
-      command_req_t command_maced = eh.e_test_set_mac_command_req(Lock_event_1);
-
-      eh.e_recv_command_req(command_maced);
-
-      Assert::IsTrue(append_reqs.size() == 5);
-
-    }
-
     TEST_METHOD(double_enclave_handle_test) {
       enclave_handle eh1;
       enclave_handle eh2;

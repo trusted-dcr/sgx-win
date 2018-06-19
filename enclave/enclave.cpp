@@ -124,7 +124,7 @@ void update_timeout() {
   sgx_read_rand(rand, 2);
   r = (rand[1] << 8) + rand[0];
   r = r % delta_max_time; //may skew randomness a bit
-
+  delete rand;
   self.t = self.t_min + r;
 }
 
@@ -437,6 +437,7 @@ void heartbeat() {
     heartbeats.push_back(heartbeat);
   }
   mac_and_broadcast_append_req(heartbeats);
+  delete placeholder;
 }
 
 void start_poll() {
